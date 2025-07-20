@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xsi:type="TaskPaneApp">
+
+  <Id>b51c222f-fa40-473c-a1d6-ca73611cc4ba</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>ishidai</ProviderName>
+  <DefaultLocale>ja-JP</DefaultLocale>
+  <DisplayName DefaultValue="Word置換ツール" />
+  <Description DefaultValue="Word文書を自動置換するAdd-in" />
+  <IconUrl DefaultValue="https://daikonoisii.github.io/word-replacement-system/my-office-addin/public/icon-32-dev.png" />
+  <SupportUrl DefaultValue="https://daikonoisii.github.io/word-replacement-system/support.html" />
+
+  <AppDomains>
+    <AppDomain>https://daikonoisii.github.io</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Document" />
+  </Hosts>
+
+  <Requirements>
+    <Sets DefaultMinVersion="1.1">
+      <Set Name="WordApi" />
+    </Sets>
+  </Requirements>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://daikonoisii.github.io/word-replacement-system/my-office-addin/public/taskpane.html"/>
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Document">
+        <DesktopFormFactor>
+          <FunctionFile resid="functionFileUrl"/>
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="MyCustomGroup">
+                <Label resid="groupLabel"/>
+                <Icon>
+                  <bt:Image size="16" resid="icon16_dev"/>
+                  <bt:Image size="32" resid="icon32_dev"/>
+                  <bt:Image size="80" resid="icon80_dev"/>
+                </Icon>
+                <Control xsi:type="Button" id="ReplaceButton">
+                  <Label resid="replaceLabel"/>
+                  <Supertip>
+                    <Title resid="replaceLabel"/>
+                    <Description resid="replaceDescription"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="icon16_dev"/>
+                    <bt:Image size="32" resid="icon32_dev"/>
+                    <bt:Image size="80" resid="icon80_dev"/>
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>runReplaceLogic</FunctionName>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+
+    <Resources>
+      <bt:Images>
+        <bt:Image id="icon16_dev" DefaultValue="https://daikonoisii.github.io/word-replacement-system/my-office-addin/public/icon-16-dev.png"/>
+        <bt:Image id="icon32_dev" DefaultValue="https://daikonoisii.github.io/word-replacement-system/my-office-addin/public/icon-32-dev.png"/>
+        <bt:Image id="icon80_dev" DefaultValue="https://daikonoisii.github.io/word-replacement-system/my-office-addin/public/icon-80-dev.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="functionFileUrl" DefaultValue="https://daikonoisii.github.io/word-replacement-system/my-office-addin/public/functions.html"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="groupLabel" DefaultValue="置換ツール"/>
+        <bt:String id="replaceLabel" DefaultValue="置換実行"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="replaceDescription" DefaultValue="Word文書内の特定語句を一括置換します"/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
