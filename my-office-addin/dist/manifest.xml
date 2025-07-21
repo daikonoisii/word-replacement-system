@@ -77,7 +77,7 @@
         <bt:Image id="icon80_dev" DefaultValue="https://daikonoisii.github.io/word-replacement-system/my-office-addin/public/icon-80-dev.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="taskpaneUrl" DefaultValue="https://daikonoisii.github.io/word-replacement-system/my-office-addin/public/taskpane.html"/>
+        <bt:Url id="taskpaneUrl" DefaultValue="https://daikonoisii.github.io/word-replacement-system/my-office-addin/taskpane.html"/>
         <bt:Url id="functionFileUrl" DefaultValue="https://daikonoisii.github.io/word-replacement-system/my-office-addin/public/functions.html"/>
       </bt:Urls>
       <bt:ShortStrings>
