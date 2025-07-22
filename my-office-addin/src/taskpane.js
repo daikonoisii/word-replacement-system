@@ -58,7 +58,7 @@ const App = () => {
         }
         // Commands-Only 実行対応
         Office.actions.associate('runReplaceLogic', () => runReplaceLogic(mapping));
-    }, [mapping]);
+    }, []);
     // 「ルールの追加」ボタン
     const onAddRule = () => {
         setMapping([...mapping, { findText: '', replaceText: '' }]);
