@@ -36,7 +36,11 @@ async function runReplaceLogic(mapping) {
             results.load('items');
             await context.sync();
             for (const range of results.items) {
-                range.insertText(replaceText, Word.InsertLocation.replace);
+                // 1. 対象語句に横線（取り消し線）と赤字を適用
+                range.font.strikeThrough = true;
+                range.font.color = 'red';
+                // 2. 直後に置換後語句（通常色）を挿入
+                range.insertText(replaceText, Word.InsertLocation.after);
             }
         }
         await context.sync();
