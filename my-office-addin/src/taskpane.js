@@ -88,6 +88,7 @@ const App = () => {
         const a = document.createElement('a');
         a.href = url;
         a.download = 'mapping.csv';
+        a.target = '_blank';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
