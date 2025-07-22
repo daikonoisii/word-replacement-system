@@ -3,14 +3,14 @@ body {
   margin: 0;
   padding: 1em;
 }
+
 .container {
   max-width: 600px;
   margin: auto;
+  /* padding: 1em;  ← もし必要ならここに */
 }
-input[type="file"] {
-  display: block;
-  margin-bottom: 1em;
-}
+
+/* 全ボタン共通 */
 button {
   display: block;
   width: 100%;
@@ -22,7 +22,45 @@ button {
   border-radius: 4px;
   cursor: pointer;
 }
+
 button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+.controls {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 1em;
+}
+
+/* コントロール内のボタンは幅自動 */
+.controls button {
+  width: auto;
+  padding: 0.5em 1em;
+}
+
+.load-csv {
+  margin-bottom: 1em;
+}
+
+.rules .rule-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.rules input {
+  flex: 1;
+  padding: 0.4em;
+}
+
+.arrow {
+  flex: 0 0 auto;
+}
+
+/* 実行ボタンだけ幅幅一杯 */
+.run-button {
+  margin-top: 1em;
 }

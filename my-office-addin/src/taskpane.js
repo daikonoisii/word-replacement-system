@@ -29,6 +29,8 @@ async function runReplaceLogic(mapping) {
 }
 const App = () => {
     const [mapping, setMapping] = useState([]);
+    const [fileInputKey, setFileInputKey] = useState(0); // file input リセット用
+    // 初期ロード：localStorage のマッピングを読み込んで表示
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
@@ -39,8 +41,20 @@ const App = () => {
                 console.error(error);
             }
         }
+        // Commands-Only 実行対応
         Office.actions.associate('runReplaceLogic', () => runReplaceLogic(mapping));
     }, [mapping]);
+    // 「ルールの追加」ボタン
+    const onAddRule = () => {
+        setMapping([...mapping, { findText: '', replaceText: '' }]);
+    };
+    // 各行の入力変更
+    const onChangeRule = (idx, field) => (e) => {
+        const copy = [...mapping];
+        copy[idx] = { ...copy[idx], [field]: e.target.value };
+        setMapping(copy);
+    };
+    // ファイル選択・読み込み
     const onFileChange = async (e) => {
         const file = e.target.files?.[0];
         if (!file)
@@ -49,10 +63,31 @@ const App = () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(m));
         setMapping(m);
     };
-    const onRunClick = () => runReplaceLogic(mapping);
-    return (_jsxs("div", { className: "container", children: [_jsx("h2", { children: "CSV\u304B\u3089\u30DE\u30C3\u30D4\u30F3\u30B0\u8AAD\u307F\u8FBC\u307F" }), _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }), _jsx("button", { onClick: onRunClick, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" })] }));
+    // 「保存」ボタン：CSV を生成してダウンロード
+    const onSave = () => {
+        const csv = mapping.map(({ findText, replaceText }) => `${findText},${replaceText}`).join('\n') +
+            '\n';
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mapping.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        // 保存後もマッピングを UI に反映し続ける
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(mapping));
+        // file input をダウンロードした CSV に「擬似的に」合わせるためリセット（ユーザー選択は不可）
+        setFileInputKey(prev => prev + 1);
+    };
+    return (_jsxs("div", { className: "container", children: [_jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSave, disabled: mapping.length === 0, children: "\u4FDD\u5B58" }), _jsx("button", { onClick: onAddRule, children: "\u30EB\u30FC\u30EB\u306E\u8FFD\u52A0" })] }), _jsx("div", { className: "load-csv", children: _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }, fileInputKey) }), _jsx("div", { className: "rules", children: mapping.map((rule, idx) => (_jsxs("div", { className: "rule-row", children: [_jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u524D", value: rule.findText, onChange: onChangeRule(idx, 'findText') }), _jsx("span", { className: "arrow", children: "\u2192" }), _jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u5F8C", value: rule.replaceText, onChange: onChangeRule(idx, 'replaceText') })] }, idx))) }), _jsx("button", { className: "run-button", onClick: () => runReplaceLogic(mapping), disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" })] }));
 };
 // Fast Refresh を有効にするために App をエクスポート
 export default App;
 // React アプリをマウント
-createRoot(document.getElementById('root')).render(_jsx(App, {}));
+Office.onReady().then(() => {
+    const container = document.getElementById('root');
+    const root = createRoot(container);
+    root.render(_jsx(App, {}));
+});
