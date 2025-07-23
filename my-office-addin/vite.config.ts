@@ -22,7 +22,13 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true // デバッグ用にソースマップ生成
+    sourcemap: true, // デバッグ用にソースマップ生成
+    rollupOptions: {
+      input: {
+        // taskpane.html をビルドのエントリに追加
+        taskpane: path.resolve(__dirname, 'taskpane.html')
+      },
+    }
   },
   resolve: {
   alias: { '@': path.resolve(__dirname, 'src') }
