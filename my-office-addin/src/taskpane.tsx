@@ -114,7 +114,7 @@ const App: React.FC = () => {
         className="run-button"
         onClick={async () => {
           try {
-            await useCase.run('default');
+            await useCase.run(STORAGE_KEY);
           } catch (e) {
             console.error(e);
           }
