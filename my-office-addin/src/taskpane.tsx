@@ -115,10 +115,8 @@ const App: React.FC = () => {
         onClick={async () => {
           try {
             await useCase.run('default');
-            alert('置換が完了しました');
           } catch (e) {
             console.error(e);
-            alert('置換中にエラーが発生しました');
           }
         }}
         disabled={mapping.length === 0}
