@@ -4,15 +4,16 @@ import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect } from 'react';
 import { STORAGE_KEY, CSV_FILE_STORAGE_ID } from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
-import { WordTextReplacer } from 'src/infrastructure/office/word/wordTextReplace';
+import { ReplaceAndHighlightReplacer } from 'src/infrastructure/office/word/wordTextReplace';
 import { LocalStorageMappingRepository } from 'src/infrastructure/storage/localStorage';
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
 import { FindText } from 'src/domain/findText';
 
+const highlight_color = 'yellow';
 const localRepository = new LocalStorageMappingRepository();
 const fileRegistry = new Map<string, File | undefined>();
 const externalRepository = new CsvMappingRepository(fileRegistry);
-const replacer = new WordTextReplacer();
+const replacer = new ReplaceAndHighlightReplacer(highlight_color);
 const useCase = new ReplaceTextUseCase(localRepository, replacer);
 
 const App: React.FC = () => {
