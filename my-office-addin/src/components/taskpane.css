@@ -64,3 +64,23 @@ button:disabled {
 .run-button {
   margin-top: 1em;
 }
+
+.button-container {
+  display: flex;
+  justify-content: flex-end; /* 右端揃え */
+  gap: 1rem; /* ボタン間の余白 */
+  margin-top: 1rem; /* 上部に余白 */
+}
+
+.undo-button {
+  background-color: #e53e3e; /* 赤系 */
+  color: #fff; /* 文字は白 */
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.undo-button:hover {
+  background-color: #c53030; /* 少し濃い赤に */
+}
