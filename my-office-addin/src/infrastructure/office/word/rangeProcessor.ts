@@ -12,3 +12,20 @@ export class ReplaceProcessor implements IRangeProcessor {
     }
   }
 }
+
+export class HighlightProcessor implements IRangeProcessor {
+  private readonly color: string;
+  constructor(color?: string) {
+    this.color = color ?? 'yellow';
+  }
+
+  async process(
+    ranges: Word.Range[],
+    _mapping: Mapping,
+    _context: Word.RequestContext
+  ): Promise<void> {
+    for (const r of ranges) {
+      r.font.highlightColor = this.color;
+    }
+  }
+}
