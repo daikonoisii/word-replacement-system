@@ -27,3 +27,26 @@ export class LocalStorageMappingRepository {
         localStorage.setItem(sourceId, JSON.stringify(mapping));
     }
 }
+export class LocalStorageUndoMappingRepository {
+    async load(sourceId) {
+        const raw = window.localStorage.getItem(sourceId);
+        if (!raw)
+            return [];
+        try {
+            const entries = JSON.parse(raw);
+            return entries.map((entry) => ({
+                // 逆置換: replaceText から findText を生成
+                findText: new FindText(entry.replaceText),
+                // 元のテキストを replaceText に設定
+                replaceText: entry.findText,
+            }));
+        }
+        catch (e) {
+            console.error('Undo mapping load failed:', e);
+            return [];
+        }
+    }
+    async save(_sourceId, _mapping) {
+        // Undo 用リポジトリでは save を行わない
+    }
+}

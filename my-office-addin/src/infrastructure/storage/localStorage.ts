@@ -1,4 +1,4 @@
-import type { Mapping } from 'src/domain/mapping';
+import type { Mapping, UndoRecord } from 'src/domain/mapping';
 import type { IMappingRepository } from 'src/repositories/mappingInterfaces';
 import { FindText } from 'src/domain/findText';
 
@@ -31,5 +31,27 @@ export class LocalStorageMappingRepository implements IMappingRepository {
   }
   async save(sourceId: string, mapping: Mapping[]): Promise<void> {
     localStorage.setItem(sourceId, JSON.stringify(mapping));
+  }
+}
+
+export class LocalStorageUndoMappingRepository implements IMappingRepository {
+  async load(sourceId: string): Promise<Mapping[]> {
+    const raw = window.localStorage.getItem(sourceId);
+    if (!raw) return [];
+    try {
+      const entries = JSON.parse(raw) as UndoRecord[];
+      return entries.map((entry) => ({
+        // 逆置換: replaceText から findText を生成
+        findText: new FindText(entry.replaceText),
+        // 元のテキストを replaceText に設定
+        replaceText: entry.findText,
+      }));
+    } catch (e) {
+      console.error('Undo mapping load failed:', e);
+      return [];
+    }
+  }
+  async save(_sourceId: string, _mapping: Mapping[]): Promise<void> {
+    // Undo 用リポジトリでは save を行わない
   }
 }

@@ -1,10 +1,10 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect } from 'react';
-import { STORAGE_KEY, CSV_FILE_STORAGE_ID } from 'src/constants/storage';
+import { STORAGE_KEY, CSV_FILE_STORAGE_ID, UNDO_STORAGE_KEY } from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
-import { ReplaceAndHighlightReplacer } from 'src/infrastructure/office/word/wordTextReplace';
-import { LocalStorageMappingRepository } from 'src/infrastructure/storage/localStorage';
+import { ReplaceAndHighlightReplacer, WordTextReplacer, } from 'src/infrastructure/office/word/wordTextReplace';
+import { LocalStorageMappingRepository, LocalStorageUndoMappingRepository, } from 'src/infrastructure/storage/localStorage';
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
 import { FindText } from 'src/domain/findText';
 const highlight_color = 'yellow';
@@ -13,6 +13,7 @@ const fileRegistry = new Map();
 const externalRepository = new CsvMappingRepository(fileRegistry);
 const replacer = new ReplaceAndHighlightReplacer(highlight_color);
 const useCase = new ReplaceTextUseCase(localRepository, replacer);
+const undoReplacementsUseCase = new ReplaceTextUseCase(new LocalStorageUndoMappingRepository(), new WordTextReplacer());
 const App = () => {
     const [mapping, setMapping] = useState([]);
     // file input リセット用
@@ -65,7 +66,10 @@ const App = () => {
                     catch (e) {
                         console.error(e);
                     }
-                }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" })] }));
+                }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" }), _jsx("button", { onClick: async () => {
+                    await undoReplacementsUseCase.run('undoRecords');
+                    window.localStorage.removeItem(UNDO_STORAGE_KEY);
+                }, children: "\u5143\u306B\u623B\u3059" })] }));
 };
 // Fast Refresh を有効にするために App をエクスポート
 export default App;

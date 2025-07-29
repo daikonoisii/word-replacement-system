@@ -2,10 +2,16 @@ import type { ChangeEvent } from 'react';
 import type { Mapping } from 'src/domain/mapping';
 import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect } from 'react';
-import { STORAGE_KEY, CSV_FILE_STORAGE_ID } from 'src/constants/storage';
+import { STORAGE_KEY, CSV_FILE_STORAGE_ID,UNDO_STORAGE_KEY } from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
-import { ReplaceAndHighlightReplacer } from 'src/infrastructure/office/word/wordTextReplace';
-import { LocalStorageMappingRepository } from 'src/infrastructure/storage/localStorage';
+import {
+  ReplaceAndHighlightReplacer,
+  WordTextReplacer,
+} from 'src/infrastructure/office/word/wordTextReplace';
+import {
+  LocalStorageMappingRepository,
+  LocalStorageUndoMappingRepository,
+} from 'src/infrastructure/storage/localStorage';
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
 import { FindText } from 'src/domain/findText';
 
@@ -15,6 +21,10 @@ const fileRegistry = new Map<string, File | undefined>();
 const externalRepository = new CsvMappingRepository(fileRegistry);
 const replacer = new ReplaceAndHighlightReplacer(highlight_color);
 const useCase = new ReplaceTextUseCase(localRepository, replacer);
+const undoReplacementsUseCase = new ReplaceTextUseCase(
+  new LocalStorageUndoMappingRepository(),
+  new WordTextReplacer()
+);
 
 const App: React.FC = () => {
   const [mapping, setMapping] = useState<Mapping[]>([]);
@@ -123,6 +133,14 @@ const App: React.FC = () => {
         disabled={mapping.length === 0}
       >
         置換実行
+      </button>
+      <button
+        onClick={async () => {
+          await undoReplacementsUseCase.run('undoRecords');
+          window.localStorage.removeItem(UNDO_STORAGE_KEY);
+        }}
+      >
+        元に戻す
       </button>
     </div>
   );
