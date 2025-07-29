@@ -8,7 +8,7 @@ export class RangeSearchService {
             const body = context.document.body;
             for (const mapping of map) {
                 const results = body.search(mapping.findText.toString(), {
-                    matchCase: true,
+                    matchCase: false,
                     matchWholeWord: mapping.findText.isAlphabetOnly(),
                 });
                 results.load('items');
