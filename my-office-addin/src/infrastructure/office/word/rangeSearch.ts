@@ -14,7 +14,7 @@ export class RangeSearchService implements ITextReplacer {
 
       for (const mapping of map) {
         const results = body.search(mapping.findText.toString(), {
-          matchCase: true,
+          matchCase: false,
           matchWholeWord: mapping.findText.isAlphabetOnly(),
         });
         results.load('items');
