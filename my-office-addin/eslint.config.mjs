@@ -34,16 +34,15 @@ export default tseslint.config(
     plugins: {
       '@typescript-eslint': tseslint.plugin,
       // @typescript-eslint プラグインを登録
-      'import': importPlugin,
+      import: importPlugin,
       // import プラグインを登録
-      'react': reactPlugin,
+      react: reactPlugin,
       // react プラグインを登録
       'react-hooks': reactHooksPlugin,
       // react-hooks プラグインを登録
     },
 
     rules: {
-      // smarthrのルールをコピーしてきた
       ...eslint.configs.recommended.rules,
       ...Prettier.rules,
       '@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
