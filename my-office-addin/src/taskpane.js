@@ -1,19 +1,18 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect } from 'react';
-import { STORAGE_KEY, CSV_FILE_STORAGE_ID, UNDO_STORAGE_KEY, } from 'src/constants/storage';
+import { STORAGE_KEY, CSV_FILE_STORAGE_ID, UNDO_STORAGE_KEY, HIGHLIGHT_COLOR, } from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
-import { ReplaceAndHighlightReplacer, WordTextReplacer, } from 'src/infrastructure/office/word/wordTextReplace';
-import { LocalStorageMappingRepository, LocalStorageUndoMappingRepository, } from 'src/infrastructure/storage/localStorage';
+import { ReplaceAndHighlightReplacer, WordTextUndoReplacer, } from 'src/infrastructure/office/word/wordTextReplace';
+import { LocalStorageMappingRepository } from 'src/infrastructure/storage/localStorage';
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
 import { FindText } from 'src/domain/findText';
-const highlight_color = 'yellow';
 const localRepository = new LocalStorageMappingRepository();
 const fileRegistry = new Map();
 const externalRepository = new CsvMappingRepository(fileRegistry);
-const replacer = new ReplaceAndHighlightReplacer(highlight_color);
+const replacer = new ReplaceAndHighlightReplacer(HIGHLIGHT_COLOR);
 const useCase = new ReplaceTextUseCase(localRepository, replacer);
-const undoReplacementsUseCase = new ReplaceTextUseCase(new LocalStorageUndoMappingRepository(), new WordTextReplacer());
+const undoReplacementsUseCase = new ReplaceTextUseCase(localRepository, new WordTextUndoReplacer());
 const App = () => {
     const [mapping, setMapping] = useState([]);
     // file input リセット用
@@ -60,7 +59,7 @@ const App = () => {
         await localRepository.save(STORAGE_KEY, mapping);
     };
     return (_jsxs("div", { className: "container", children: [_jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSave, disabled: mapping.length === 0, children: "\u4FDD\u5B58" }), _jsx("button", { onClick: onAddRule, children: "\u30EB\u30FC\u30EB\u306E\u8FFD\u52A0" })] }), _jsx("div", { className: "load-csv", children: _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }, fileInputKey) }), _jsx("div", { className: "rules", children: mapping.map((rule, idx) => (_jsxs("div", { className: "rule-row", children: [_jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u524D", value: rule.findText.value, onChange: onChangeRule(idx, 'findText') }), _jsx("span", { className: "arrow", children: "\u2192" }), _jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u5F8C", value: rule.replaceText, onChange: onChangeRule(idx, 'replaceText') })] }, idx))) }), _jsxs("div", { className: "button-container", children: [_jsx("button", { className: "undo-button", onClick: async () => {
-                            await undoReplacementsUseCase.run(UNDO_STORAGE_KEY);
+                            await undoReplacementsUseCase.run(STORAGE_KEY);
                             window.localStorage.removeItem(UNDO_STORAGE_KEY);
                         }, children: "\u5143\u306B\u623B\u3059" }), _jsx("button", { onClick: async () => {
                             try {
