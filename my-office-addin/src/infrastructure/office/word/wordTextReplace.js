@@ -1,20 +1,29 @@
+import { ReplaceProcessor, HighlightProcessor, } from 'src/infrastructure/office/word/rangeProcessor';
+import { RangeSearchService } from 'src/infrastructure/office/word/rangeSearch';
 export class WordTextReplacer {
+    service;
+    constructor() {
+        // 検索後に置換を実行するプロセッサ群を注入
+        const processors = [new ReplaceProcessor()];
+        this.service = new RangeSearchService(processors);
+    }
     async replace(map) {
-        await Word.run(async (context) => {
-            const body = context.document.body;
-            for (const { findText, replaceText } of map) {
-                // 文字列がアルファベットの時のみ単語一致機能を使用する
-                const results = body.search(findText.toString(), {
-                    matchCase: true,
-                    matchWholeWord: findText.isAlphabetOnly(),
-                });
-                results.load('items');
-                await context.sync();
-                for (const range of results.items) {
-                    range.insertText(replaceText, Word.InsertLocation.replace);
-                }
-            }
-            await context.sync();
-        });
+        await this.service.replace(map);
+    }
+}
+export class ReplaceAndHighlightReplacer {
+    service;
+    color;
+    constructor(color) {
+        this.color = color;
+        // 検索後に「置換→ハイライト」の順で実行するプロセッサ群を注入
+        const processors = [
+            new ReplaceProcessor(),
+            new HighlightProcessor(this.color),
+        ];
+        this.service = new RangeSearchService(processors);
+    }
+    async replace(map) {
+        await this.service.replace(map);
     }
 }
