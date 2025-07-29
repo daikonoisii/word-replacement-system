@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect } from 'react';
-import { STORAGE_KEY, CSV_FILE_STORAGE_ID, UNDO_STORAGE_KEY } from 'src/constants/storage';
+import { STORAGE_KEY, CSV_FILE_STORAGE_ID, UNDO_STORAGE_KEY, } from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
 import { ReplaceAndHighlightReplacer, WordTextReplacer, } from 'src/infrastructure/office/word/wordTextReplace';
 import { LocalStorageMappingRepository, LocalStorageUndoMappingRepository, } from 'src/infrastructure/storage/localStorage';
@@ -59,17 +59,17 @@ const App = () => {
     const onSave = async () => {
         await localRepository.save(STORAGE_KEY, mapping);
     };
-    return (_jsxs("div", { className: "container", children: [_jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSave, disabled: mapping.length === 0, children: "\u4FDD\u5B58" }), _jsx("button", { onClick: onAddRule, children: "\u30EB\u30FC\u30EB\u306E\u8FFD\u52A0" })] }), _jsx("div", { className: "load-csv", children: _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }, fileInputKey) }), _jsx("div", { className: "rules", children: mapping.map((rule, idx) => (_jsxs("div", { className: "rule-row", children: [_jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u524D", value: rule.findText.value, onChange: onChangeRule(idx, 'findText') }), _jsx("span", { className: "arrow", children: "\u2192" }), _jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u5F8C", value: rule.replaceText, onChange: onChangeRule(idx, 'replaceText') })] }, idx))) }), _jsx("button", { className: "run-button", onClick: async () => {
-                    try {
-                        await useCase.run(STORAGE_KEY);
-                    }
-                    catch (e) {
-                        console.error(e);
-                    }
-                }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" }), _jsx("button", { onClick: async () => {
-                    await undoReplacementsUseCase.run('undoRecords');
-                    window.localStorage.removeItem(UNDO_STORAGE_KEY);
-                }, children: "\u5143\u306B\u623B\u3059" })] }));
+    return (_jsxs("div", { className: "container", children: [_jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSave, disabled: mapping.length === 0, children: "\u4FDD\u5B58" }), _jsx("button", { onClick: onAddRule, children: "\u30EB\u30FC\u30EB\u306E\u8FFD\u52A0" })] }), _jsx("div", { className: "load-csv", children: _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }, fileInputKey) }), _jsx("div", { className: "rules", children: mapping.map((rule, idx) => (_jsxs("div", { className: "rule-row", children: [_jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u524D", value: rule.findText.value, onChange: onChangeRule(idx, 'findText') }), _jsx("span", { className: "arrow", children: "\u2192" }), _jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u5F8C", value: rule.replaceText, onChange: onChangeRule(idx, 'replaceText') })] }, idx))) }), _jsxs("div", { className: "button-container", children: [_jsx("button", { className: "undo-button", onClick: async () => {
+                            await undoReplacementsUseCase.run(UNDO_STORAGE_KEY);
+                            window.localStorage.removeItem(UNDO_STORAGE_KEY);
+                        }, children: "\u5143\u306B\u623B\u3059" }), _jsx("button", { onClick: async () => {
+                            try {
+                                await useCase.run(STORAGE_KEY);
+                            }
+                            catch (e) {
+                                console.error(e);
+                            }
+                        }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" })] })] }));
 };
 // Fast Refresh を有効にするために App をエクスポート
 export default App;

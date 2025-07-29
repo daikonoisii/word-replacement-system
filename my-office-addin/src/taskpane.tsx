@@ -2,7 +2,11 @@ import type { ChangeEvent } from 'react';
 import type { Mapping } from 'src/domain/mapping';
 import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect } from 'react';
-import { STORAGE_KEY, CSV_FILE_STORAGE_ID,UNDO_STORAGE_KEY } from 'src/constants/storage';
+import {
+  STORAGE_KEY,
+  CSV_FILE_STORAGE_ID,
+  UNDO_STORAGE_KEY,
+} from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
 import {
   ReplaceAndHighlightReplacer,
@@ -120,28 +124,29 @@ const App: React.FC = () => {
         ))}
       </div>
 
-      {/* 実行ボタン */}
-      <button
-        className="run-button"
-        onClick={async () => {
-          try {
-            await useCase.run(STORAGE_KEY);
-          } catch (e) {
-            console.error(e);
-          }
-        }}
-        disabled={mapping.length === 0}
-      >
-        置換実行
-      </button>
-      <button
-        onClick={async () => {
-          await undoReplacementsUseCase.run('undoRecords');
-          window.localStorage.removeItem(UNDO_STORAGE_KEY);
-        }}
-      >
-        元に戻す
-      </button>
+      <div className="button-container">
+        <button
+          className="undo-button"
+          onClick={async () => {
+            await undoReplacementsUseCase.run(UNDO_STORAGE_KEY);
+            window.localStorage.removeItem(UNDO_STORAGE_KEY);
+          }}
+        >
+          元に戻す
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              await useCase.run(STORAGE_KEY);
+            } catch (e) {
+              console.error(e);
+            }
+          }}
+          disabled={mapping.length === 0}
+        >
+          置換実行
+        </button>
+      </div>
     </div>
   );
 };
