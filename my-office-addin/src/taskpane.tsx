@@ -6,28 +6,25 @@ import {
   STORAGE_KEY,
   CSV_FILE_STORAGE_ID,
   UNDO_STORAGE_KEY,
+  HIGHLIGHT_COLOR,
 } from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
 import {
   ReplaceAndHighlightReplacer,
-  WordTextReplacer,
+  WordTextUndoReplacer,
 } from 'src/infrastructure/office/word/wordTextReplace';
-import {
-  LocalStorageMappingRepository,
-  LocalStorageUndoMappingRepository,
-} from 'src/infrastructure/storage/localStorage';
+import { LocalStorageMappingRepository } from 'src/infrastructure/storage/localStorage';
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
 import { FindText } from 'src/domain/findText';
 
-const highlight_color = 'yellow';
 const localRepository = new LocalStorageMappingRepository();
 const fileRegistry = new Map<string, File | undefined>();
 const externalRepository = new CsvMappingRepository(fileRegistry);
-const replacer = new ReplaceAndHighlightReplacer(highlight_color);
+const replacer = new ReplaceAndHighlightReplacer(HIGHLIGHT_COLOR);
 const useCase = new ReplaceTextUseCase(localRepository, replacer);
 const undoReplacementsUseCase = new ReplaceTextUseCase(
-  new LocalStorageUndoMappingRepository(),
-  new WordTextReplacer()
+  localRepository,
+  new WordTextUndoReplacer()
 );
 
 const App: React.FC = () => {
@@ -128,7 +125,7 @@ const App: React.FC = () => {
         <button
           className="undo-button"
           onClick={async () => {
-            await undoReplacementsUseCase.run(UNDO_STORAGE_KEY);
+            await undoReplacementsUseCase.run(STORAGE_KEY);
             window.localStorage.removeItem(UNDO_STORAGE_KEY);
           }}
         >

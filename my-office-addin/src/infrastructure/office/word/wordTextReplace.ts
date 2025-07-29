@@ -5,8 +5,10 @@ import { MetadataProcessor } from 'src/infrastructure/office/word/metadataProces
 import {
   ReplaceProcessor,
   HighlightProcessor,
+  ReplaceHighlightProcessor,
 } from 'src/infrastructure/office/word/rangeProcessor';
-import { UNDO_STORAGE_KEY } from 'src/constants/storage';
+import { FindText } from 'src/domain/findText';
+import { UNDO_STORAGE_KEY, HIGHLIGHT_COLOR } from 'src/constants/storage';
 import { RangeSearchService } from 'src/infrastructure/office/word/rangeSearch';
 
 export class WordTextReplacer implements ITextReplacer {
@@ -38,5 +40,23 @@ export class ReplaceAndHighlightReplacer implements ITextReplacer {
 
   async replace(map: Mapping[]): Promise<void> {
     await this.service.replace(map);
+  }
+}
+
+export class WordTextUndoReplacer implements ITextReplacer {
+  private readonly service: RangeSearchService;
+  constructor() {
+    // 検索後に置換を実行するプロセッサ群を注入
+    const processors: IRangeProcessor[] = [
+      new ReplaceHighlightProcessor(HIGHLIGHT_COLOR),
+    ];
+    this.service = new RangeSearchService(processors);
+  }
+  async replace(map: Mapping[]): Promise<void> {
+    const reversed: Mapping[] = map.map(({ findText, replaceText }) => ({
+      findText: new FindText(replaceText),
+      replaceText: findText.value,
+    }));
+    await this.service.replace(reversed);
   }
 }

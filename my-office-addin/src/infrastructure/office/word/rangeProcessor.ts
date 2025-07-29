@@ -13,6 +13,34 @@ export class ReplaceProcessor implements IRangeProcessor {
   }
 }
 
+export class ReplaceHighlightProcessor implements IRangeProcessor {
+  private readonly color: string;
+  constructor(color?: string) {
+    this.color = color ?? 'yellow';
+  }
+  async process(
+    ranges: Word.Range[],
+    mapping: Mapping,
+    context: Word.RequestContext
+  ): Promise<void> {
+    for (const range of ranges) {
+      // ハイライトの色を読み込む
+      range.font.load('highlightColor');
+    }
+
+    // ハイライトカラーの情報を取得
+    await context.sync();
+
+    for (const range of ranges) {
+      if (range.font.highlightColor === this.color) {
+        range.insertText(mapping.replaceText, Word.InsertLocation.replace);
+      }
+    }
+
+    await context.sync();
+  }
+}
+
 export class HighlightProcessor implements IRangeProcessor {
   private readonly color: string;
   constructor(color?: string) {
