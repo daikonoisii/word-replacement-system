@@ -1,4 +1,6 @@
+import { MetadataProcessor } from 'src/infrastructure/office/word/metadataProcessor';
 import { ReplaceProcessor, HighlightProcessor, } from 'src/infrastructure/office/word/rangeProcessor';
+import { UNDO_STORAGE_KEY } from 'src/constants/storage';
 import { RangeSearchService } from 'src/infrastructure/office/word/rangeSearch';
 export class WordTextReplacer {
     service;
@@ -18,9 +20,11 @@ export class ReplaceAndHighlightReplacer {
         this.color = color;
         // 検索後に「置換→ハイライト」の順で実行するプロセッサ群を注入
         const processors = [
+            new MetadataProcessor(),
             new ReplaceProcessor(),
             new HighlightProcessor(this.color),
         ];
+        window.localStorage.removeItem(UNDO_STORAGE_KEY);
         this.service = new RangeSearchService(processors);
     }
     async replace(map) {
