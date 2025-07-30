@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import {
   STORAGE_KEY,
   CSV_FILE_STORAGE_ID,
-  UNDO_STORAGE_KEY,
   HIGHLIGHT_COLOR,
 } from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
@@ -130,7 +129,7 @@ const App: React.FC = () => {
             } catch (e) {
               console.error(e);
             }
-            window.localStorage.removeItem(UNDO_STORAGE_KEY);
+            // window.localStorage.removeItem(UNDO_STORAGE_KEY);
           }}
         >
           元に戻す
