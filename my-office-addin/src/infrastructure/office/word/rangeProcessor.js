@@ -28,10 +28,11 @@ export class ReplaceHighlightProcessor {
 export class HighlightProcessor {
     color;
     constructor(color) {
-        this.color = color ?? 'yellow';
+        this.color = color ?? null;
     }
     async process(ranges, _mapping, _context) {
         for (const r of ranges) {
+            // @ts-ignore
             r.font.highlightColor = this.color;
         }
     }

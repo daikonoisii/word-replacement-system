@@ -36,6 +36,7 @@ export class WordTextUndoReplacer {
         // 検索後に置換を実行するプロセッサ群を注入
         const processors = [
             new ReplaceHighlightProcessor(HIGHLIGHT_COLOR),
+            new HighlightProcessor(),
         ];
         this.service = new RangeSearchService(processors);
     }

@@ -42,9 +42,9 @@ export class ReplaceHighlightProcessor implements IRangeProcessor {
 }
 
 export class HighlightProcessor implements IRangeProcessor {
-  private readonly color: string;
+  private readonly color: string | null;
   constructor(color?: string) {
-    this.color = color ?? 'yellow';
+    this.color = color ?? null;
   }
 
   async process(
@@ -53,6 +53,7 @@ export class HighlightProcessor implements IRangeProcessor {
     _context: Word.RequestContext
   ): Promise<void> {
     for (const r of ranges) {
+      // @ts-ignore
       r.font.highlightColor = this.color;
     }
   }
