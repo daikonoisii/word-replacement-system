@@ -32,6 +32,9 @@ export class ReplaceHighlightProcessor implements IRangeProcessor {
     await context.sync();
 
     for (const range of ranges) {
+      console.log(
+        `range.text="${range.text}", highlightColor="${range.font.highlightColor}", expected="${this.color}"`
+      );
       if (range.font.highlightColor === this.color) {
         range.insertText(mapping.replaceText, Word.InsertLocation.replace);
       }
