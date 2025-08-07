@@ -56,6 +56,12 @@ const App: React.FC = () => {
     setMapping([...mapping, { findText: new FindText(''), replaceText: '' }]);
   };
 
+  const onRemoveRule = (idx: number) => {
+    setMapping((prev) => {
+      const newMapping = prev.filter((_, index) => index !== idx);
+      return newMapping;
+    });
+  };
   // 各行の入力変更
   const onChangeRule =
     (idx: number, field: 'findText' | 'replaceText') =>
@@ -116,6 +122,7 @@ const App: React.FC = () => {
               value={rule.replaceText}
               onChange={onChangeRule(idx, 'replaceText')}
             />
+            <button onClick={() => onRemoveRule(idx)}>削除</button>
           </div>
         ))}
       </div>

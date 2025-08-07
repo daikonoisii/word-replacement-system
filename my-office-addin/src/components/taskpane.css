@@ -7,7 +7,6 @@ body {
 .container {
   max-width: 600px;
   margin: auto;
-  /* padding: 1em;  ← もし必要ならここに */
 }
 
 /* 全ボタン共通 */
@@ -54,6 +53,19 @@ button:disabled {
 .rules input {
   flex: 1;
   padding: 0.4em;
+}
+
+.rules button {
+  width: auto;
+  background-color: #e35959;
+  padding: 0.4em;
+  font-size: 0.8em; /* 文字を少し小さく */
+  line-height: 1; /* 高さの余白を詰める */
+  cursor: pointer;
+}
+
+.rules button:hover {
+  background-color: #c53030;
 }
 
 .arrow {
