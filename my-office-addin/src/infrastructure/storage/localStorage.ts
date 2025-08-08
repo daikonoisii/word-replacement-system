@@ -1,5 +1,6 @@
 import type { Mapping, UndoRecord } from 'src/domain/mapping';
 import type { IMappingRepository } from 'src/repositories/mappingInterfaces';
+import type { IListRepository } from 'src/repositories/listInterface';
 import { FindText } from 'src/domain/findText';
 
 export class LocalStorageMappingRepository implements IMappingRepository {
@@ -53,5 +54,19 @@ export class LocalStorageUndoMappingRepository implements IMappingRepository {
   }
   async save(_sourceId: string, _mapping: Mapping[]): Promise<void> {
     // Undo 用リポジトリでは save を行わない
+  }
+}
+
+export class LocalStorageListRepository implements IListRepository {
+  async load(sourceId: string): Promise<string[]> {
+    const saved = localStorage.getItem(sourceId);
+    return saved ? JSON.parse(saved) : [];
+  }
+  async add(sourceId: string, list: string[]): Promise<void> {
+    // 既存の配列の後ろに複数の要素を追加する
+    const saved = localStorage.getItem(sourceId);
+    const array = saved ? JSON.parse(saved) : [];
+    array.push(...list);
+    localStorage.setItem(sourceId, JSON.stringify(list));
   }
 }

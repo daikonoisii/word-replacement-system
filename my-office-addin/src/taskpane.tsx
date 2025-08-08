@@ -16,13 +16,13 @@ import { LocalStorageMappingRepository } from 'src/infrastructure/storage/localS
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
 import { FindText } from 'src/domain/findText';
 
-const localRepository = new LocalStorageMappingRepository();
+const localMappingRepository = new LocalStorageMappingRepository();
 const fileRegistry = new Map<string, File | undefined>();
 const externalRepository = new CsvMappingRepository(fileRegistry);
 const replacer = new ReplaceAndHighlightReplacer(HIGHLIGHT_COLOR);
-const useCase = new ReplaceTextUseCase(localRepository, replacer);
+const useCase = new ReplaceTextUseCase(localMappingRepository, replacer);
 const undoReplacementsUseCase = new ReplaceTextUseCase(
-  localRepository,
+  localMappingRepository,
   new WordTextUndoReplacer()
 );
 
@@ -45,7 +45,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      localRepository.save(STORAGE_KEY, mapping).then(() => {});
+      localMappingRepository.save(STORAGE_KEY, mapping).then(() => {});
     }, 500);
 
     return () => clearTimeout(timeoutId);
@@ -77,12 +77,12 @@ const App: React.FC = () => {
     fileRegistry.set(CSV_FILE_STORAGE_ID, file);
     if (!file) return;
     const m = await externalRepository.load(CSV_FILE_STORAGE_ID);
-    localRepository.save(STORAGE_KEY, m);
+    localMappingRepository.save(STORAGE_KEY, m);
     setMapping(m);
   };
 
   const onSave = async () => {
-    await localRepository.save(STORAGE_KEY, mapping);
+    await localMappingRepository.save(saveName, mapping);
   };
 
   return (
