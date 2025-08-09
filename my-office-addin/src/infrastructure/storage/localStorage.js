@@ -60,6 +60,6 @@ export class LocalStorageListRepository {
         const saved = localStorage.getItem(sourceId);
         const array = saved ? JSON.parse(saved) : [];
         array.push(...list);
-        localStorage.setItem(sourceId, JSON.stringify(list));
+        localStorage.setItem(sourceId, JSON.stringify(array));
     }
 }

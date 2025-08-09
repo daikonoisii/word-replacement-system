@@ -1,10 +1,10 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect } from 'react';
-import { STORAGE_KEY, CSV_FILE_STORAGE_ID, HIGHLIGHT_COLOR, DEFAULT_RULE_NAME, } from 'src/constants/storage';
+import { STORAGE_KEY, CSV_FILE_STORAGE_ID, HIGHLIGHT_COLOR, DEFAULT_RULE_NAME, RULE_LIST_NAME, } from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
 import { ReplaceAndHighlightReplacer, WordTextUndoReplacer, } from 'src/infrastructure/office/word/wordTextReplace';
-import { LocalStorageMappingRepository } from 'src/infrastructure/storage/localStorage';
+import { LocalStorageMappingRepository, LocalStorageListRepository, } from 'src/infrastructure/storage/localStorage';
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
 import { FindText } from 'src/domain/findText';
 const localMappingRepository = new LocalStorageMappingRepository();
@@ -13,10 +13,12 @@ const externalRepository = new CsvMappingRepository(fileRegistry);
 const replacer = new ReplaceAndHighlightReplacer(HIGHLIGHT_COLOR);
 const useCase = new ReplaceTextUseCase(localMappingRepository, replacer);
 const undoReplacementsUseCase = new ReplaceTextUseCase(localMappingRepository, new WordTextUndoReplacer());
+const localListRepository = new LocalStorageListRepository();
 const App = () => {
     const [mapping, setMapping] = useState([]);
     const [saveName, setSaveName] = useState(''); // 入力欄（新規名用）
     const [currentRuleName, setCurrentRuleName] = useState('');
+    const [ruleNames, setRuleNames] = useState([]);
     // file input リセット用
     const [fileInputKey] = useState(0);
     // 初期ロード：localStorage のマッピングを読み込んで表示
@@ -32,7 +34,31 @@ const App = () => {
                 console.error(error);
             }
         }
+        (async () => {
+            try {
+                const list = await localListRepository.load(RULE_LIST_NAME);
+                setRuleNames(Array.isArray(list) ? list : []);
+            }
+            catch (e) {
+                console.error('rule list load error:', e);
+                setRuleNames([]);
+            }
+        })();
     }, []);
+    useEffect(() => {
+        if (!currentRuleName)
+            return;
+        try {
+            const saved = localStorage.getItem(currentRuleName);
+            if (saved)
+                setMapping(JSON.parse(saved));
+            localStorage.setItem(STORAGE_KEY, currentRuleName);
+            setSaveName(currentRuleName);
+        }
+        catch (e) {
+            console.error('load mapping by currentRuleName error:', e);
+        }
+    }, [currentRuleName]);
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             // 現在編集しているルールの名称を取得
@@ -59,9 +85,17 @@ const App = () => {
     };
     // 各行の入力変更
     const onChangeRule = (idx, field) => (e) => {
-        const copy = [...mapping];
-        copy[idx] = { ...copy[idx], [field]: e.target.value };
-        setMapping(copy);
+        const v = e.target.value;
+        setMapping((prev) => {
+            const next = [...prev];
+            if (field === 'findText') {
+                next[idx] = { ...next[idx], findText: new FindText(v) };
+            }
+            else {
+                next[idx] = { ...next[idx], replaceText: v };
+            }
+            return next;
+        });
     };
     // ファイル選択・読み込み
     const onFileChange = async (e) => {
@@ -84,6 +118,8 @@ const App = () => {
             localStorage.setItem(STORAGE_KEY, name);
             setCurrentRuleName(name);
             await localMappingRepository.save(name, mapping);
+            await localListRepository.add(RULE_LIST_NAME, [name]);
+            setRuleNames((prev) => (prev.includes(name) ? prev : [...prev, name]));
         }
         catch (e) {
             console.error('名前を付けて保存 失敗:', e);
@@ -104,7 +140,9 @@ const App = () => {
             console.error('上書き保存 失敗:', e);
         }
     };
-    return (_jsxs("div", { className: "container", children: [_jsxs("div", { className: "controls", children: [_jsx("div", { className: "load-csv", children: _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }, fileInputKey) }), _jsx("button", { onClick: onAddRule, children: "\u30EB\u30FC\u30EB\u306E\u8FFD\u52A0" })] }), _jsx("div", { className: "rules", children: mapping.map((rule, idx) => (_jsxs("div", { className: "rule-row", children: [_jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u524D", value: rule.findText.value, onChange: onChangeRule(idx, 'findText') }), _jsx("span", { className: "arrow", children: "\u2192" }), _jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u5F8C", value: rule.replaceText, onChange: onChangeRule(idx, 'replaceText') }), _jsx("button", { onClick: () => onRemoveRule(idx), children: "\u524A\u9664" })] }, idx))) }), _jsxs("div", { className: "button-container", children: [_jsx("button", { className: "undo-button", onClick: async () => {
+    return (_jsxs("div", { className: "container", children: [_jsxs("div", { className: "controls", children: [_jsx("div", { className: "load-csv", children: _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }, fileInputKey) }), _jsx("button", { onClick: onAddRule, children: "\u30EB\u30FC\u30EB\u306E\u8FFD\u52A0" }), _jsxs("label", { children: ["\u30EB\u30FC\u30EB\u3092\u9078\u629E\uFF1A", _jsxs("select", { value: currentRuleName, onChange: (e) => {
+                                    setCurrentRuleName(e.target.value);
+                                }, children: [_jsx("option", { value: "", disabled: true, children: "\u9078\u629E\u3057\u3066\u304F\u3060\u3055\u3044" }), ruleNames.map((name) => (_jsx("option", { value: name, children: name }, name)))] })] })] }), _jsx("div", { className: "rules", children: mapping.map((rule, idx) => (_jsxs("div", { className: "rule-row", children: [_jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u524D", value: rule.findText.value, onChange: onChangeRule(idx, 'findText') }), _jsx("span", { className: "arrow", children: "\u2192" }), _jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u5F8C", value: rule.replaceText, onChange: onChangeRule(idx, 'replaceText') }), _jsx("button", { onClick: () => onRemoveRule(idx), children: "\u524A\u9664" })] }, idx))) }), _jsxs("div", { className: "button-container", children: [_jsx("button", { className: "undo-button", onClick: async () => {
                             try {
                                 if (!currentRuleName) {
                                     throw new Error('currentRuleName is empty');
