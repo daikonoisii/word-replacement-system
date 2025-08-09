@@ -78,9 +78,16 @@ const App: React.FC = () => {
   const onChangeRule =
     (idx: number, field: 'findText' | 'replaceText') =>
     (e: ChangeEvent<HTMLInputElement>) => {
-      const copy = [...mapping];
-      copy[idx] = { ...copy[idx], [field]: e.target.value };
-      setMapping(copy);
+      const v = e.target.value;
+      setMapping((prev) => {
+        const next = [...prev];
+        if (field === 'findText') {
+          next[idx] = { ...next[idx], findText: new FindText(v) };
+        } else {
+          next[idx] = { ...next[idx], replaceText: v };
+        }
+        return next;
+      });
     };
 
   // ファイル選択・読み込み
