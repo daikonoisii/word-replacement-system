@@ -7,13 +7,17 @@ import {
   CSV_FILE_STORAGE_ID,
   HIGHLIGHT_COLOR,
   DEFAULT_RULE_NAME,
+  RULE_LIST_NAME,
 } from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
 import {
   ReplaceAndHighlightReplacer,
   WordTextUndoReplacer,
 } from 'src/infrastructure/office/word/wordTextReplace';
-import { LocalStorageMappingRepository } from 'src/infrastructure/storage/localStorage';
+import {
+  LocalStorageMappingRepository,
+  LocalStorageListRepository,
+} from 'src/infrastructure/storage/localStorage';
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
 import { FindText } from 'src/domain/findText';
 
@@ -26,11 +30,13 @@ const undoReplacementsUseCase = new ReplaceTextUseCase(
   localMappingRepository,
   new WordTextUndoReplacer()
 );
+const localListRepository = new LocalStorageListRepository();
 
 const App: React.FC = () => {
   const [mapping, setMapping] = useState<Mapping[]>([]);
   const [saveName, setSaveName] = useState(''); // 入力欄（新規名用）
   const [currentRuleName, setCurrentRuleName] = useState('');
+  const [ruleNames, setRuleNames] = useState<string[]>([]);
   // file input リセット用
   const [fileInputKey] = useState(0);
 
@@ -46,7 +52,28 @@ const App: React.FC = () => {
         console.error(error);
       }
     }
+    (async () => {
+      try {
+        const list = await localListRepository.load(RULE_LIST_NAME);
+        setRuleNames(Array.isArray(list) ? list : []);
+      } catch (e) {
+        console.error('rule list load error:', e);
+        setRuleNames([]);
+      }
+    })();
   }, []);
+
+  useEffect(() => {
+    if (!currentRuleName) return;
+    try {
+      const saved = localStorage.getItem(currentRuleName);
+      if (saved) setMapping(JSON.parse(saved));
+      localStorage.setItem(STORAGE_KEY, currentRuleName);
+      setSaveName(currentRuleName);
+    } catch (e) {
+      console.error('load mapping by currentRuleName error:', e);
+    }
+  }, [currentRuleName]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -110,6 +137,8 @@ const App: React.FC = () => {
       localStorage.setItem(STORAGE_KEY, name);
       setCurrentRuleName(name);
       await localMappingRepository.save(name, mapping);
+      await localListRepository.add(RULE_LIST_NAME, [name]);
+      setRuleNames((prev) => (prev.includes(name) ? prev : [...prev, name]));
     } catch (e) {
       console.error('名前を付けて保存 失敗:', e);
     }
@@ -143,6 +172,25 @@ const App: React.FC = () => {
           />
         </div>
         <button onClick={onAddRule}>ルールの追加</button>
+        {/* 保存されたルールの読み込み */}
+        <label>
+          ルールを選択：
+          <select
+            value={currentRuleName}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              setCurrentRuleName(e.target.value);
+            }}
+          >
+            <option value="" disabled>
+              選択してください
+            </option>
+            {ruleNames.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       {/* ルール一覧 */}
       <div className="rules">
