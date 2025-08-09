@@ -50,3 +50,16 @@ export class LocalStorageUndoMappingRepository {
         // Undo 用リポジトリでは save を行わない
     }
 }
+export class LocalStorageListRepository {
+    async load(sourceId) {
+        const saved = localStorage.getItem(sourceId);
+        return saved ? JSON.parse(saved) : [];
+    }
+    async add(sourceId, list) {
+        // 既存の配列の後ろに複数の要素を追加する
+        const saved = localStorage.getItem(sourceId);
+        const array = saved ? JSON.parse(saved) : [];
+        array.push(...list);
+        localStorage.setItem(sourceId, JSON.stringify(list));
+    }
+}
