@@ -161,20 +161,19 @@ const App: React.FC = () => {
   return (
     <div className="container">
       {/* 上部コントロール */}
-      <div className="controls">
-        {/* CSV 読み込み用 */}
-        <div className="load-csv">
-          <input
-            key={fileInputKey}
-            type="file"
-            accept=".csv"
-            onChange={onFileChange}
-          />
-        </div>
-        <button onClick={onAddRule}>ルールの追加</button>
-        {/* 保存されたルールの読み込み */}
+      {/* CSV 読み込み用 */}
+      <div className="load-csv">
+        <input
+          key={fileInputKey}
+          type="file"
+          accept=".csv"
+          onChange={onFileChange}
+        />
+      </div>
+      {/* 保存されたルールの読み込み */}
+      <div className="form-group">
+        <span className="form-label">項目を選択：</span>
         <label>
-          ルールを選択：
           <select
             value={currentRuleName}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -215,6 +214,7 @@ const App: React.FC = () => {
       </div>
 
       <div className="button-container">
+        <button onClick={onAddRule}>項目の追加</button>
         {/* 置換を取り消すボタン */}
         <button
           className="undo-button"
@@ -248,21 +248,21 @@ const App: React.FC = () => {
         >
           置換実行
         </button>
-      </div>
-      {/* ルールを保存 */}
-      <div className="controls">
         {currentRuleName !== DEFAULT_RULE_NAME && (
           <button onClick={onOverwrite} disabled={mapping.length === 0}>
             上書き保存
           </button>
         )}
-        <button onClick={onSaveAs}>名前を付けて保存</button>
-        <input
-          type="text"
-          placeholder="保存名を入力"
-          value={saveName}
-          onChange={(e) => setSaveName(e.target.value)}
-        />
+        {/* 項目を保存 */}
+        <div className="controls">
+          <button onClick={onSaveAs}>名前を付けて保存</button>
+          <input
+            type="text"
+            placeholder="保存名を入力"
+            value={saveName}
+            onChange={(e) => setSaveName(e.target.value)}
+          />
+        </div>
       </div>
     </div>
   );
