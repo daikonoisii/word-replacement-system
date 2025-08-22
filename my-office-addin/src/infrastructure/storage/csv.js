@@ -1,14 +1,17 @@
 import { FindText } from 'src/domain/findText';
 export class CsvMappingRepository {
     fileRegistry;
-    constructor(fileRegistry) {
+    decoder;
+    constructor(fileRegistry, decoder) {
         this.fileRegistry = fileRegistry;
+        this.decoder = decoder;
     }
     async load(id) {
         const file = this.fileRegistry.get(id);
         if (!file)
             throw new Error('File not found for sourceId: ' + id);
-        const text = await file.text();
+        // デコーダーでUnicodeで取得
+        const text = await this.decoder.decode(file);
         return text
             .split(/\r?\n/)
             .filter((line) => line && !line.startsWith('#'))

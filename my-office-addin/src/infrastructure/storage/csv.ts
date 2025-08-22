@@ -1,17 +1,26 @@
 import type { Mapping } from 'src/domain/mapping';
 import type { IMappingRepository } from 'src/repositories/mappingInterfaces';
+import type { ITextDecoderService } from 'src/repositories/textDecoderInterface';
 import { FindText } from 'src/domain/findText';
 
 export class CsvMappingRepository implements IMappingRepository {
   private fileRegistry: Map<string, File | undefined>;
-  constructor(fileRegistry: Map<string, File | undefined>) {
+  private decoder: ITextDecoderService;
+  constructor(
+    fileRegistry: Map<string, File | undefined>,
+    decoder: ITextDecoderService
+  ) {
     this.fileRegistry = fileRegistry;
+    this.decoder = decoder;
   }
 
   async load(id: string): Promise<Mapping[]> {
     const file = this.fileRegistry.get(id);
     if (!file) throw new Error('File not found for sourceId: ' + id);
-    const text = await file.text();
+
+    // デコーダーでUnicodeで取得
+    const text = await this.decoder.decode(file);
+
     return text
       .split(/\r?\n/)
       .filter((line) => line && !line.startsWith('#'))

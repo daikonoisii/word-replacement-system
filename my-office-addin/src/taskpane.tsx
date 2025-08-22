@@ -19,11 +19,16 @@ import {
   LocalStorageListRepository,
 } from 'src/infrastructure/storage/localStorage';
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
+import { CsvTextDecoderService } from 'src/infrastructure/decoder/textDecoder';
 import { FindText } from 'src/domain/findText';
 
 const localMappingRepository = new LocalStorageMappingRepository();
 const fileRegistry = new Map<string, File | undefined>();
-const externalRepository = new CsvMappingRepository(fileRegistry);
+const unicodeDecoder = new CsvTextDecoderService();
+const externalRepository = new CsvMappingRepository(
+  fileRegistry,
+  unicodeDecoder
+);
 const replacer = new ReplaceAndHighlightReplacer(HIGHLIGHT_COLOR);
 const useCase = new ReplaceTextUseCase(localMappingRepository, replacer);
 const undoReplacementsUseCase = new ReplaceTextUseCase(
