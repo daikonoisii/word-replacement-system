@@ -264,7 +264,6 @@ const App: React.FC = () => {
           <input
             type="text"
             placeholder="保存名を入力"
-            value={saveName}
             onChange={(e) => setSaveName(e.target.value)}
           />
         </div>
