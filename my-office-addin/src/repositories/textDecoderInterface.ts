@@ -1,3 +1,3 @@
 export interface ITextDecoderService {
-  decode(text: string): string;
+  decode(text: File): Promise<string>;
 }

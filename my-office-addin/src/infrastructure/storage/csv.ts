@@ -18,10 +18,8 @@ export class CsvMappingRepository implements IMappingRepository {
     const file = this.fileRegistry.get(id);
     if (!file) throw new Error('File not found for sourceId: ' + id);
 
-    // ファイルからテキスト取得
-    const rawText = await file.text();
-    // デコーダーで文字コード変換
-    const text = this.decoder.decode(rawText);
+    // デコーダーでUnicodeで取得
+    const text = await this.decoder.decode(file);
 
     return text
       .split(/\r?\n/)
