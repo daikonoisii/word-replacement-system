@@ -164,7 +164,7 @@ const App = () => {
                             catch (e) {
                                 console.error(e);
                             }
-                        }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" }), currentRuleName !== DEFAULT_RULE_NAME && (_jsx("button", { onClick: onOverwrite, disabled: mapping.length === 0, children: "\u4E0A\u66F8\u304D\u4FDD\u5B58" })), _jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSaveAs, children: "\u540D\u524D\u3092\u4ED8\u3051\u3066\u4FDD\u5B58" }), _jsx("input", { type: "text", placeholder: "\u4FDD\u5B58\u540D\u3092\u5165\u529B", value: saveName, onChange: (e) => setSaveName(e.target.value) })] })] })] }));
+                        }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" }), currentRuleName !== DEFAULT_RULE_NAME && (_jsx("button", { onClick: onOverwrite, disabled: mapping.length === 0, children: "\u4E0A\u66F8\u304D\u4FDD\u5B58" })), _jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSaveAs, children: "\u540D\u524D\u3092\u4ED8\u3051\u3066\u4FDD\u5B58" }), _jsx("input", { type: "text", placeholder: "\u4FDD\u5B58\u540D\u3092\u5165\u529B", onChange: (e) => setSaveName(e.target.value) })] })] })] }));
 };
 // Fast Refresh を有効にするために App をエクスポート
 export default App;
