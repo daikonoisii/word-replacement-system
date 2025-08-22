@@ -80,20 +80,20 @@ const App: React.FC = () => {
     }
   }, [currentRuleName]);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      // 現在編集しているルールの名称を取得
-      if (currentRuleName) {
-        try {
-          localMappingRepository.save(currentRuleName, mapping).then(() => {});
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    }, 500);
+  // useEffect(() => {
+  //   const timeoutId = setTimeout(() => {
+  //     // 現在編集しているルールの名称を取得
+  //     if (currentRuleName) {
+  //       try {
+  //         localMappingRepository.save(currentRuleName, mapping).then(() => {});
+  //       } catch (error) {
+  //         console.error(error);
+  //       }
+  //     }
+  //   }, 500);
 
-    return () => clearTimeout(timeoutId);
-  }, [mapping]);
+  //   return () => clearTimeout(timeoutId);
+  // }, [mapping]);
 
   // 「ルールの追加」ボタン
   const onAddRule = () => {

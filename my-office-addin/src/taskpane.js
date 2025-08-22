@@ -61,20 +61,19 @@ const App = () => {
             console.error('load mapping by currentRuleName error:', e);
         }
     }, [currentRuleName]);
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            // 現在編集しているルールの名称を取得
-            if (currentRuleName) {
-                try {
-                    localMappingRepository.save(currentRuleName, mapping).then(() => { });
-                }
-                catch (error) {
-                    console.error(error);
-                }
-            }
-        }, 500);
-        return () => clearTimeout(timeoutId);
-    }, [mapping]);
+    // useEffect(() => {
+    //   const timeoutId = setTimeout(() => {
+    //     // 現在編集しているルールの名称を取得
+    //     if (currentRuleName) {
+    //       try {
+    //         localMappingRepository.save(currentRuleName, mapping).then(() => {});
+    //       } catch (error) {
+    //         console.error(error);
+    //       }
+    //     }
+    //   }, 500);
+    //   return () => clearTimeout(timeoutId);
+    // }, [mapping]);
     // 「ルールの追加」ボタン
     const onAddRule = () => {
         setMapping([...mapping, { findText: new FindText(''), replaceText: '' }]);
