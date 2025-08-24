@@ -8,6 +8,15 @@ export class ReplaceTextUseCase {
     this.replacer = replacer;
   }
   async run(map: Mapping[]): Promise<void> {
+    console.log(
+      'run: ' +
+        JSON.stringify(
+          map.map((m) => ({
+            findText: m.findText.value ?? 'miss',
+            replaceText: m.replaceText,
+          }))
+        )
+    );
     await this.replacer.replace(map);
   }
 }
