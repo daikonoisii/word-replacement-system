@@ -1,15 +1,13 @@
-import type { IMappingRepository } from 'src/repositories/mappingInterfaces';
+import type { Mapping } from 'src/domain/mapping';
 import type { ITextReplacer } from 'src/repositories/textEditingInterfaces';
+
 export class ReplaceTextUseCase {
-  private repository: IMappingRepository;
   private replacer: ITextReplacer;
 
-  constructor(repository: IMappingRepository, replacer: ITextReplacer) {
-    this.repository = repository;
+  constructor(replacer: ITextReplacer) {
     this.replacer = replacer;
   }
-  async run(sourceId: string): Promise<void> {
-    const map = await this.repository.load(sourceId);
+  async run(map: Mapping[]): Promise<void> {
     await this.replacer.replace(map);
   }
 }

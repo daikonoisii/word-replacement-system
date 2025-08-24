@@ -1,12 +1,9 @@
 export class ReplaceTextUseCase {
-    repository;
     replacer;
-    constructor(repository, replacer) {
-        this.repository = repository;
+    constructor(replacer) {
         this.replacer = replacer;
     }
-    async run(sourceId) {
-        const map = await this.repository.load(sourceId);
+    async run(map) {
         await this.replacer.replace(map);
     }
 }

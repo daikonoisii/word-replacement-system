@@ -30,9 +30,8 @@ const externalRepository = new CsvMappingRepository(
   unicodeDecoder
 );
 const replacer = new ReplaceAndHighlightReplacer(HIGHLIGHT_COLOR);
-const useCase = new ReplaceTextUseCase(localMappingRepository, replacer);
+const useCase = new ReplaceTextUseCase(replacer);
 const undoReplacementsUseCase = new ReplaceTextUseCase(
-  localMappingRepository,
   new WordTextUndoReplacer()
 );
 const localListRepository = new LocalStorageListRepository();
@@ -47,7 +46,7 @@ const App: React.FC = () => {
 
   // 初期ロード：localStorage のマッピングを読み込んで表示
   useEffect(() => {
-    setCurrentRuleName(localStorage.getItem(STORAGE_KEY) || '');
+    setCurrentRuleName(localStorage.getItem(STORAGE_KEY) || DEFAULT_RULE_NAME);
     setSaveName(currentRuleName);
     const saved = localStorage.getItem(currentRuleName);
     if (saved) {
@@ -228,7 +227,7 @@ const App: React.FC = () => {
               if (!currentRuleName) {
                 throw new Error('currentRuleName is empty');
               }
-              await undoReplacementsUseCase.run(currentRuleName);
+              await undoReplacementsUseCase.run(mapping);
             } catch (e) {
               console.error(e);
             }
@@ -244,7 +243,7 @@ const App: React.FC = () => {
               if (!currentRuleName) {
                 throw new Error('currentRuleName is empty');
               }
-              await useCase.run(currentRuleName);
+              await useCase.run(mapping);
             } catch (e) {
               console.error(e);
             }
