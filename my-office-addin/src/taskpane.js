@@ -117,9 +117,9 @@ const App = () => {
             return;
         try {
             localStorage.setItem(STORAGE_KEY, name);
-            setCurrentRuleName(name);
             await localMappingRepository.save(name, mapping);
             await localListRepository.add(RULE_LIST_NAME, [name]);
+            setCurrentRuleName(name);
             setRuleNames((prev) => (prev.includes(name) ? prev : [...prev, name]));
         }
         catch (e) {
