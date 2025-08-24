@@ -46,7 +46,7 @@ const App: React.FC = () => {
 
   // 初期ロード：localStorage のマッピングを読み込んで表示
   useEffect(() => {
-    setCurrentRuleName(localStorage.getItem(STORAGE_KEY) || '');
+    setCurrentRuleName(localStorage.getItem(STORAGE_KEY) || DEFAULT_RULE_NAME);
     setSaveName(currentRuleName);
     const saved = localStorage.getItem(currentRuleName);
     if (saved) {
