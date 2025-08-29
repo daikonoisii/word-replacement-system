@@ -71,7 +71,14 @@ const App: React.FC = () => {
     if (!currentRuleName) return;
     try {
       const saved = localStorage.getItem(currentRuleName);
-      if (saved) setMapping(JSON.parse(saved));
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved) as StoredMapping[];
+          setMapping(reviveMapping(parsed));
+        } catch (e) {
+          console.error(e);
+        }
+      }
       localStorage.setItem(STORAGE_KEY, currentRuleName);
       setSaveName(currentRuleName);
     } catch (e) {
@@ -93,6 +100,20 @@ const App: React.FC = () => {
 
   //   return () => clearTimeout(timeoutId);
   // }, [mapping]);
+
+  type StoredMapping = {
+    findText: string | { value: string };
+    replaceText?: string;
+  };
+
+  const reviveMapping = (raw: StoredMapping[]): Mapping[] => {
+    return (raw ?? []).map((m) => ({
+      findText: new FindText(
+        typeof m.findText === 'string' ? m.findText : m.findText?.value ?? ''
+      ),
+      replaceText: m.replaceText ?? '',
+    }));
+  };
 
   // 「ルールの追加」ボタン
   const onAddRule = () => {
