@@ -1,14 +1,13 @@
 import type { Mapping } from 'src/domain/mapping';
 import type { IRangeProcessor } from 'src/repositories/rangeProcessInterface';
-import type { ITextReplacer } from 'src/repositories/textEditingInterfaces';
 
-export class RangeSearchService implements ITextReplacer {
+export class RangeSearchService {
   private readonly processors: IRangeProcessor[];
   constructor(processors: IRangeProcessor[]) {
     this.processors = processors;
   }
 
-  async replace(map: Mapping[]): Promise<void> {
+  async run(map: Mapping[]): Promise<void> {
     await Word.run(async (context) => {
       const body = context.document.body;
 

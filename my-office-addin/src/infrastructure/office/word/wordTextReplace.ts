@@ -17,7 +17,7 @@ export class WordTextReplacer implements ITextReplacer {
     this.service = new RangeSearchService(processors);
   }
   async replace(map: Mapping[]): Promise<void> {
-    await this.service.replace(map);
+    await this.service.run(map);
   }
 }
 
@@ -36,7 +36,7 @@ export class ReplaceAndHighlightReplacer implements ITextReplacer {
   }
 
   async replace(map: Mapping[]): Promise<void> {
-    await this.service.replace(map);
+    await this.service.run(map);
   }
 }
 
@@ -52,6 +52,6 @@ export class WordTextUndoReplacer implements ITextReplacer {
   }
   async replace(map: Mapping[]): Promise<void> {
     const reversed = reverseMappings(map);
-    await this.service.replace(reversed);
+    await this.service.run(reversed);
   }
 }
