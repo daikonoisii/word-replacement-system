@@ -1,7 +1,7 @@
 import type { Mapping } from 'src/domain/mapping';
 import type { IRangeProcessor } from 'src/repositories/rangeProcessInterface';
 
-export class RangeSearchService {
+export class RangeProcessorService {
   private readonly processors: IRangeProcessor[];
   constructor(processors: IRangeProcessor[]) {
     this.processors = processors;
