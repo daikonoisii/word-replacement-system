@@ -1,4 +1,3 @@
-import type { Mapping } from 'src/domain/mapping';
 import type { ITextReplacer } from 'src/repositories/textEditingInterfaces';
 import type { IRangeProcessor } from 'src/repositories/rangeProcessInterface';
 import {
@@ -6,7 +5,7 @@ import {
   HighlightProcessor,
   ReplaceHighlightProcessor,
 } from 'src/infrastructure/office/word/rangeProcessor';
-import { FindText } from 'src/domain/findText';
+import { Mapping, reverseMappings } from 'src/domain/mapping';
 import { UNDO_STORAGE_KEY, HIGHLIGHT_COLOR } from 'src/constants/storage';
 import { RangeSearchService } from 'src/infrastructure/office/word/rangeSearch';
 
@@ -52,10 +51,7 @@ export class WordTextUndoReplacer implements ITextReplacer {
     this.service = new RangeSearchService(processors);
   }
   async replace(map: Mapping[]): Promise<void> {
-    const reversed: Mapping[] = map.map(({ findText, replaceText }) => ({
-      findText: new FindText(replaceText),
-      replaceText: findText.value,
-    }));
+    const reversed = reverseMappings(map);
     await this.service.replace(reversed);
   }
 }

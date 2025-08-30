@@ -1,4 +1,4 @@
-import type { Mapping, UndoRecord } from 'src/domain/mapping';
+import { Mapping, type UndoRecord } from 'src/domain/mapping';
 import type { IMappingRepository } from 'src/repositories/mappingInterfaces';
 import type { IListRepository } from 'src/repositories/listInterface';
 import { FindText } from 'src/domain/findText';
@@ -20,10 +20,8 @@ export class LocalStorageMappingRepository implements IMappingRepository {
           typeof entry.findText === 'string'
             ? entry.findText
             : entry.findText.value;
-        return {
-          findText: new FindText(value),
-          replaceText: entry.replaceText,
-        };
+        const mapping = new Mapping(new FindText(value), entry.replaceText);
+        return mapping;
       });
     } catch (e) {
       console.error('localStorage からのマッピング読み込みに失敗:', e);
@@ -41,12 +39,11 @@ export class LocalStorageUndoMappingRepository implements IMappingRepository {
     if (!raw) return [];
     try {
       const entries = JSON.parse(raw) as UndoRecord[];
-      return entries.map((entry) => ({
-        // 逆置換: replaceText から findText を生成
-        findText: new FindText(entry.replaceText),
-        // 元のテキストを replaceText に設定
-        replaceText: entry.findText,
-      }));
+      // 逆置換: replaceText から findText を生成
+
+      return entries.map((entry) => {
+        return new Mapping(new FindText(entry.replaceText), entry.findText);
+      });
     } catch (e) {
       console.error('Undo mapping load failed:', e);
       return [];

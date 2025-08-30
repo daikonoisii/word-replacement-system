@@ -1,4 +1,4 @@
-import type { Mapping } from 'src/domain/mapping';
+import { Mapping } from 'src/domain/mapping';
 import type { IMappingRepository } from 'src/repositories/mappingInterfaces';
 import type { ITextDecoderService } from 'src/repositories/textDecoderInterface';
 import { FindText } from 'src/domain/findText';
@@ -26,10 +26,11 @@ export class CsvMappingRepository implements IMappingRepository {
       .filter((line) => line && !line.startsWith('#'))
       .map((line) => {
         const [findText, replaceText] = line.split(',');
-        return {
-          findText: new FindText(findText.trim()),
-          replaceText: replaceText.trim(),
-        };
+        const mapping = new Mapping(
+          new FindText(findText.trim()),
+          replaceText.trim()
+        );
+        return mapping;
       });
   }
 

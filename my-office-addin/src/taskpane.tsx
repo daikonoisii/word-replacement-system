@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { Mapping } from 'src/domain/mapping';
+import { Mapping } from 'src/domain/mapping';
 import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect } from 'react';
 import {
@@ -107,17 +107,22 @@ const App: React.FC = () => {
   };
 
   const reviveMapping = (raw: StoredMapping[]): Mapping[] => {
-    return (raw ?? []).map((m) => ({
-      findText: new FindText(
-        typeof m.findText === 'string' ? m.findText : m.findText?.value ?? ''
-      ),
-      replaceText: m.replaceText ?? '',
-    }));
+    return (raw ?? []).map(
+      (m) =>
+        new Mapping(
+          new FindText(
+            typeof m.findText === 'string'
+              ? m.findText
+              : m.findText?.value ?? ''
+          ),
+          m.replaceText ?? ''
+        )
+    );
   };
 
   // 「ルールの追加」ボタン
   const onAddRule = () => {
-    setMapping([...mapping, { findText: new FindText(''), replaceText: '' }]);
+    setMapping([...mapping, new Mapping(new FindText(''), '')]);
   };
 
   const onRemoveRule = (idx: number) => {
@@ -134,9 +139,9 @@ const App: React.FC = () => {
       setMapping((prev) => {
         const next = [...prev];
         if (field === 'findText') {
-          next[idx] = { ...next[idx], findText: new FindText(v) };
+          next[idx] = new Mapping(new FindText(v), next[idx].replaceText);
         } else {
-          next[idx] = { ...next[idx], replaceText: v };
+          next[idx] = new Mapping(next[idx].findText, v);
         }
         return next;
       });
