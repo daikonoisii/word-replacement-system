@@ -55,3 +55,17 @@ export class WordTextUndoReplacer implements ITextReplacer {
     await this.service.run(reversed);
   }
 }
+
+export class WordTextHighlightColorReplacer implements ITextReplacer {
+  private readonly service: RangeProcessorService;
+  constructor(beforeColor: string, afterColor: string | null) {
+    const processors: IRangeProcessor[] = [
+      new HighlightProcessor(beforeColor, afterColor),
+    ];
+    this.service = new RangeProcessorService(processors);
+  }
+  async replace(map: Mapping[]): Promise<void> {
+    const reversed = reverseMappings(map);
+    await this.service.run(reversed);
+  }
+}

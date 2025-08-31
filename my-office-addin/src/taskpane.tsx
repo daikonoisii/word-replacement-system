@@ -13,6 +13,7 @@ import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
 import {
   ReplaceAndHighlightReplacer,
   WordTextUndoReplacer,
+  WordTextHighlightColorReplacer,
 } from 'src/infrastructure/office/word/wordTextReplace';
 import {
   LocalStorageMappingRepository,
@@ -33,6 +34,9 @@ const replacer = new ReplaceAndHighlightReplacer(HIGHLIGHT_COLOR);
 const useCase = new ReplaceTextUseCase(replacer);
 const undoReplacementsUseCase = new ReplaceTextUseCase(
   new WordTextUndoReplacer()
+);
+const deleteHighlightUseCase = new ReplaceTextUseCase(
+  new WordTextHighlightColorReplacer(HIGHLIGHT_COLOR, null)
 );
 const localListRepository = new LocalStorageListRepository();
 
@@ -188,6 +192,7 @@ const App: React.FC = () => {
       console.error('上書き保存 失敗:', e);
     }
   };
+
   return (
     <div className="container">
       {/* 上部コントロール */}
@@ -277,6 +282,23 @@ const App: React.FC = () => {
           disabled={mapping.length === 0}
         >
           置換実行
+        </button>
+        {/* ハイライトの削除ボタン */}
+        <button
+          className="undo-button"
+          onClick={async () => {
+            try {
+              if (!currentRuleName) {
+                throw new Error('currentRuleName is empty');
+              }
+              await deleteHighlightUseCase.run(mapping);
+            } catch (e) {
+              console.error(e);
+            }
+          }}
+          disabled={mapping.length === 0}
+        >
+          蛍光ペンの削除
         </button>
         {currentRuleName !== DEFAULT_RULE_NAME && (
           <button onClick={onOverwrite} disabled={mapping.length === 0}>
