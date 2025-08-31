@@ -32,8 +32,13 @@ export class HighlightProcessor {
         this.afterColor = afterColor;
         this.beforeColor = beforeColor;
     }
-    async process(ranges, _mapping, _context) {
+    async process(ranges, _mapping, context) {
         for (const r of ranges) {
+            // 全てのhighlightColorをload
+            for (const r of ranges) {
+                r.font.load('highlightColor');
+            }
+            await context.sync();
             // nullはハイライトされていない箇所のみを対象とする
             // undefinedは全ての色を対象
             if (r.font.highlightColor != this.beforeColor &&
