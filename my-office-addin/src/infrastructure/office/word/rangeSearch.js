@@ -1,9 +1,9 @@
-export class RangeSearchService {
+export class RangeProcessorService {
     processors;
     constructor(processors) {
         this.processors = processors;
     }
-    async replace(map) {
+    async run(map) {
         await Word.run(async (context) => {
             const body = context.document.body;
             for (const mapping of map) {

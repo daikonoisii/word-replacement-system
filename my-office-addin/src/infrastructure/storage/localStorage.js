@@ -1,3 +1,4 @@
+import { Mapping } from 'src/domain/mapping';
 import { FindText } from 'src/domain/findText';
 export class LocalStorageMappingRepository {
     async load(sourceId) {
@@ -12,10 +13,8 @@ export class LocalStorageMappingRepository {
                 const value = typeof entry.findText === 'string'
                     ? entry.findText
                     : entry.findText.value;
-                return {
-                    findText: new FindText(value),
-                    replaceText: entry.replaceText,
-                };
+                const mapping = new Mapping(new FindText(value), entry.replaceText);
+                return mapping;
             });
         }
         catch (e) {
@@ -34,12 +33,10 @@ export class LocalStorageUndoMappingRepository {
             return [];
         try {
             const entries = JSON.parse(raw);
-            return entries.map((entry) => ({
-                // 逆置換: replaceText から findText を生成
-                findText: new FindText(entry.replaceText),
-                // 元のテキストを replaceText に設定
-                replaceText: entry.findText,
-            }));
+            // 逆置換: replaceText から findText を生成
+            return entries.map((entry) => {
+                return new Mapping(new FindText(entry.replaceText), entry.findText);
+            });
         }
         catch (e) {
             console.error('Undo mapping load failed:', e);

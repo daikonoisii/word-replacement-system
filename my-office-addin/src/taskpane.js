@@ -1,9 +1,10 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Mapping } from 'src/domain/mapping';
 import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect } from 'react';
 import { STORAGE_KEY, CSV_FILE_STORAGE_ID, HIGHLIGHT_COLOR, DEFAULT_RULE_NAME, RULE_LIST_NAME, } from 'src/constants/storage';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
-import { ReplaceAndHighlightReplacer, WordTextUndoReplacer, } from 'src/infrastructure/office/word/wordTextReplace';
+import { ReplaceAndHighlightReplacer, WordTextUndoReplacer, WordTextHighlightColorReplacer, } from 'src/infrastructure/office/word/wordTextReplace';
 import { LocalStorageMappingRepository, LocalStorageListRepository, } from 'src/infrastructure/storage/localStorage';
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
 import { CsvTextDecoderService } from 'src/infrastructure/decoder/textDecoder';
@@ -15,6 +16,7 @@ const externalRepository = new CsvMappingRepository(fileRegistry, unicodeDecoder
 const replacer = new ReplaceAndHighlightReplacer(HIGHLIGHT_COLOR);
 const useCase = new ReplaceTextUseCase(replacer);
 const undoReplacementsUseCase = new ReplaceTextUseCase(new WordTextUndoReplacer());
+const deleteHighlightUseCase = new ReplaceTextUseCase(new WordTextHighlightColorReplacer(HIGHLIGHT_COLOR, null));
 const localListRepository = new LocalStorageListRepository();
 const App = () => {
     const [mapping, setMapping] = useState([]);
@@ -69,14 +71,13 @@ const App = () => {
         }
     }, [currentRuleName]);
     const reviveMapping = (raw) => {
-        return (raw ?? []).map((m) => ({
-            findText: new FindText(typeof m.findText === 'string' ? m.findText : m.findText?.value ?? ''),
-            replaceText: m.replaceText ?? '',
-        }));
+        return (raw ?? []).map((m) => new Mapping(new FindText(typeof m.findText === 'string'
+            ? m.findText
+            : m.findText?.value ?? ''), m.replaceText ?? ''));
     };
     // 「ルールの追加」ボタン
     const onAddRule = () => {
-        setMapping([...mapping, { findText: new FindText(''), replaceText: '' }]);
+        setMapping([...mapping, new Mapping(new FindText(''), '')]);
     };
     const onRemoveRule = (idx) => {
         setMapping((prev) => {
@@ -90,10 +91,10 @@ const App = () => {
         setMapping((prev) => {
             const next = [...prev];
             if (field === 'findText') {
-                next[idx] = { ...next[idx], findText: new FindText(v) };
+                next[idx] = new Mapping(new FindText(v), next[idx].replaceText);
             }
             else {
-                next[idx] = { ...next[idx], replaceText: v };
+                next[idx] = new Mapping(next[idx].findText, v);
             }
             return next;
         });
@@ -164,7 +165,17 @@ const App = () => {
                             catch (e) {
                                 console.error(e);
                             }
-                        }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" }), currentRuleName !== DEFAULT_RULE_NAME && (_jsx("button", { onClick: onOverwrite, disabled: mapping.length === 0, children: "\u4E0A\u66F8\u304D\u4FDD\u5B58" })), _jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSaveAs, children: "\u540D\u524D\u3092\u4ED8\u3051\u3066\u4FDD\u5B58" }), _jsx("input", { type: "text", placeholder: "\u4FDD\u5B58\u540D\u3092\u5165\u529B", onChange: (e) => setSaveName(e.target.value) })] })] })] }));
+                        }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" }), _jsx("button", { className: "undo-button", onClick: async () => {
+                            try {
+                                if (!currentRuleName) {
+                                    throw new Error('currentRuleName is empty');
+                                }
+                                await deleteHighlightUseCase.run(mapping);
+                            }
+                            catch (e) {
+                                console.error(e);
+                            }
+                        }, disabled: mapping.length === 0, children: "\u86CD\u5149\u30DA\u30F3\u306E\u524A\u9664" }), currentRuleName !== DEFAULT_RULE_NAME && (_jsx("button", { onClick: onOverwrite, disabled: mapping.length === 0, children: "\u4E0A\u66F8\u304D\u4FDD\u5B58" })), _jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSaveAs, children: "\u540D\u524D\u3092\u4ED8\u3051\u3066\u4FDD\u5B58" }), _jsx("input", { type: "text", placeholder: "\u4FDD\u5B58\u540D\u3092\u5165\u529B", onChange: (e) => setSaveName(e.target.value) })] })] })] }));
 };
 // Fast Refresh を有効にするために App をエクスポート
 export default App;

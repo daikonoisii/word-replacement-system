@@ -1,4 +1,3 @@
-import type { Mapping } from 'src/domain/mapping';
 import type { ITextReplacer } from 'src/repositories/textEditingInterfaces';
 import type { IRangeProcessor } from 'src/repositories/rangeProcessInterface';
 import {
@@ -6,24 +5,24 @@ import {
   HighlightProcessor,
   ReplaceHighlightProcessor,
 } from 'src/infrastructure/office/word/rangeProcessor';
-import { FindText } from 'src/domain/findText';
+import { Mapping, reverseMappings } from 'src/domain/mapping';
 import { UNDO_STORAGE_KEY, HIGHLIGHT_COLOR } from 'src/constants/storage';
-import { RangeSearchService } from 'src/infrastructure/office/word/rangeSearch';
+import { RangeProcessorService } from 'src/infrastructure/office/word/rangeSearch';
 
 export class WordTextReplacer implements ITextReplacer {
-  private readonly service: RangeSearchService;
+  private readonly service: RangeProcessorService;
   constructor() {
     // 検索後に置換を実行するプロセッサ群を注入
     const processors: IRangeProcessor[] = [new ReplaceProcessor()];
-    this.service = new RangeSearchService(processors);
+    this.service = new RangeProcessorService(processors);
   }
   async replace(map: Mapping[]): Promise<void> {
-    await this.service.replace(map);
+    await this.service.run(map);
   }
 }
 
 export class ReplaceAndHighlightReplacer implements ITextReplacer {
-  private readonly service: RangeSearchService;
+  private readonly service: RangeProcessorService;
   private readonly color: string;
   constructor(color: string) {
     this.color = color;
@@ -33,29 +32,40 @@ export class ReplaceAndHighlightReplacer implements ITextReplacer {
       new HighlightProcessor(this.color),
     ];
     window.localStorage.removeItem(UNDO_STORAGE_KEY);
-    this.service = new RangeSearchService(processors);
+    this.service = new RangeProcessorService(processors);
   }
 
   async replace(map: Mapping[]): Promise<void> {
-    await this.service.replace(map);
+    await this.service.run(map);
   }
 }
 
 export class WordTextUndoReplacer implements ITextReplacer {
-  private readonly service: RangeSearchService;
+  private readonly service: RangeProcessorService;
   constructor() {
     // 検索後に置換を実行するプロセッサ群を注入
     const processors: IRangeProcessor[] = [
       new ReplaceHighlightProcessor(HIGHLIGHT_COLOR),
-      new HighlightProcessor(),
+      new HighlightProcessor(null),
     ];
-    this.service = new RangeSearchService(processors);
+    this.service = new RangeProcessorService(processors);
   }
   async replace(map: Mapping[]): Promise<void> {
-    const reversed: Mapping[] = map.map(({ findText, replaceText }) => ({
-      findText: new FindText(replaceText),
-      replaceText: findText.value,
-    }));
-    await this.service.replace(reversed);
+    const reversed = reverseMappings(map);
+    await this.service.run(reversed);
+  }
+}
+
+export class WordTextHighlightColorReplacer implements ITextReplacer {
+  private readonly service: RangeProcessorService;
+  constructor(beforeColor: string, afterColor: string | null) {
+    const processors: IRangeProcessor[] = [
+      new HighlightProcessor(beforeColor, afterColor),
+    ];
+    this.service = new RangeProcessorService(processors);
+  }
+  async replace(map: Mapping[]): Promise<void> {
+    const reversed = reverseMappings(map);
+    await this.service.run(reversed);
   }
 }

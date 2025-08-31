@@ -1,3 +1,4 @@
+import { Mapping } from 'src/domain/mapping';
 import { FindText } from 'src/domain/findText';
 export class CsvMappingRepository {
     fileRegistry;
@@ -17,10 +18,8 @@ export class CsvMappingRepository {
             .filter((line) => line && !line.startsWith('#'))
             .map((line) => {
             const [findText, replaceText] = line.split(',');
-            return {
-                findText: new FindText(findText.trim()),
-                replaceText: replaceText.trim(),
-            };
+            const mapping = new Mapping(new FindText(findText.trim()), replaceText.trim());
+            return mapping;
         });
     }
     async save() {

@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { Mapping } from 'src/domain/mapping';
+import { Mapping } from 'src/domain/mapping';
 import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect } from 'react';
 import {
@@ -13,6 +13,7 @@ import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
 import {
   ReplaceAndHighlightReplacer,
   WordTextUndoReplacer,
+  WordTextHighlightColorReplacer,
 } from 'src/infrastructure/office/word/wordTextReplace';
 import {
   LocalStorageMappingRepository,
@@ -33,6 +34,9 @@ const replacer = new ReplaceAndHighlightReplacer(HIGHLIGHT_COLOR);
 const useCase = new ReplaceTextUseCase(replacer);
 const undoReplacementsUseCase = new ReplaceTextUseCase(
   new WordTextUndoReplacer()
+);
+const deleteHighlightUseCase = new ReplaceTextUseCase(
+  new WordTextHighlightColorReplacer(HIGHLIGHT_COLOR, null)
 );
 const localListRepository = new LocalStorageListRepository();
 
@@ -107,17 +111,22 @@ const App: React.FC = () => {
   };
 
   const reviveMapping = (raw: StoredMapping[]): Mapping[] => {
-    return (raw ?? []).map((m) => ({
-      findText: new FindText(
-        typeof m.findText === 'string' ? m.findText : m.findText?.value ?? ''
-      ),
-      replaceText: m.replaceText ?? '',
-    }));
+    return (raw ?? []).map(
+      (m) =>
+        new Mapping(
+          new FindText(
+            typeof m.findText === 'string'
+              ? m.findText
+              : m.findText?.value ?? ''
+          ),
+          m.replaceText ?? ''
+        )
+    );
   };
 
   // 「ルールの追加」ボタン
   const onAddRule = () => {
-    setMapping([...mapping, { findText: new FindText(''), replaceText: '' }]);
+    setMapping([...mapping, new Mapping(new FindText(''), '')]);
   };
 
   const onRemoveRule = (idx: number) => {
@@ -134,9 +143,9 @@ const App: React.FC = () => {
       setMapping((prev) => {
         const next = [...prev];
         if (field === 'findText') {
-          next[idx] = { ...next[idx], findText: new FindText(v) };
+          next[idx] = new Mapping(new FindText(v), next[idx].replaceText);
         } else {
-          next[idx] = { ...next[idx], replaceText: v };
+          next[idx] = new Mapping(next[idx].findText, v);
         }
         return next;
       });
@@ -183,6 +192,7 @@ const App: React.FC = () => {
       console.error('上書き保存 失敗:', e);
     }
   };
+
   return (
     <div className="container">
       {/* 上部コントロール */}
@@ -272,6 +282,23 @@ const App: React.FC = () => {
           disabled={mapping.length === 0}
         >
           置換実行
+        </button>
+        {/* ハイライトの削除ボタン */}
+        <button
+          className="undo-button"
+          onClick={async () => {
+            try {
+              if (!currentRuleName) {
+                throw new Error('currentRuleName is empty');
+              }
+              await deleteHighlightUseCase.run(mapping);
+            } catch (e) {
+              console.error(e);
+            }
+          }}
+          disabled={mapping.length === 0}
+        >
+          蛍光ペンの削除
         </button>
         {currentRuleName !== DEFAULT_RULE_NAME && (
           <button onClick={onOverwrite} disabled={mapping.length === 0}>

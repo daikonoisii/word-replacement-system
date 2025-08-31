@@ -26,14 +26,22 @@ export class ReplaceHighlightProcessor {
     }
 }
 export class HighlightProcessor {
-    color;
-    constructor(color) {
-        this.color = color ?? null;
+    afterColor;
+    beforeColor;
+    constructor(afterColor, beforeColor) {
+        this.afterColor = afterColor;
+        this.beforeColor = beforeColor;
     }
     async process(ranges, _mapping, _context) {
         for (const r of ranges) {
+            // nullはハイライトされていない箇所のみを対象とする
+            // undefinedは全ての色を対象
+            if (r.font.highlightColor != this.beforeColor &&
+                this.beforeColor != undefined) {
+                continue;
+            }
             // @ts-ignore
-            r.font.highlightColor = this.color;
+            r.font.highlightColor = this.afterColor;
         }
     }
 }
