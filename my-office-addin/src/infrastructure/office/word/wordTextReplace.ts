@@ -58,9 +58,9 @@ export class WordTextUndoReplacer implements ITextReplacer {
 
 export class WordTextHighlightColorReplacer implements ITextReplacer {
   private readonly service: RangeProcessorService;
-  constructor(beforeColor: string, afterColor: string | null) {
+  constructor(beforeColor: string | null, afterColor: string | null) {
     const processors: IRangeProcessor[] = [
-      new HighlightProcessor(beforeColor, afterColor),
+      new HighlightProcessor(afterColor, beforeColor),
     ];
     this.service = new RangeProcessorService(processors);
   }
