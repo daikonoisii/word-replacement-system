@@ -31,7 +31,28 @@ export class ReplaceAndHighlightReplacer implements ITextReplacer {
       new ReplaceProcessor(),
       new HighlightProcessor(this.color),
     ];
-    window.localStorage.removeItem(UNDO_STORAGE_KEY);
+    try {
+      // Office.contextが利用可能かチェック
+      if (
+        typeof Office !== 'undefined' &&
+        Office.context &&
+        Office.context.roamingSettings
+      ) {
+        Office.context.roamingSettings.remove(UNDO_STORAGE_KEY);
+        Office.context.roamingSettings.saveAsync(() => {
+          // 保存の完了は特に待たない（非同期で実行）
+        });
+      } else {
+        // フォールバックとしてlocalStorageを使用
+        localStorage.removeItem(UNDO_STORAGE_KEY);
+      }
+    } catch (error) {
+      console.warn(
+        'roamingSettings not available, falling back to localStorage:',
+        error
+      );
+      localStorage.removeItem(UNDO_STORAGE_KEY);
+    }
     this.service = new RangeProcessorService(processors);
   }
 

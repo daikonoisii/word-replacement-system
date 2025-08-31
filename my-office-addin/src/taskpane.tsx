@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react';
 import { Mapping } from 'src/domain/mapping';
 import { createRoot } from 'react-dom/client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   STORAGE_KEY,
   CSV_FILE_STORAGE_ID,
@@ -40,6 +40,63 @@ const deleteHighlightUseCase = new ReplaceTextUseCase(
 );
 const localListRepository = new LocalStorageListRepository();
 
+// roamingSettings用のヘルパー関数（Office.jsの初期化チェック付き）
+const getRoamingSetting = (key: string): string | null => {
+  try {
+    // Office.contextが利用可能かチェック
+    if (
+      typeof Office !== 'undefined' &&
+      Office.context &&
+      Office.context.roamingSettings
+    ) {
+      const value = Office.context.roamingSettings.get(key);
+      return value || null;
+    }
+    // フォールバックとしてlocalStorageを使用
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.warn(
+      'roamingSettings not available, falling back to localStorage:',
+      error
+    );
+    return localStorage.getItem(key);
+  }
+};
+
+const setRoamingSetting = (key: string, value: string): Promise<void> => {
+  try {
+    // Office.contextが利用可能かチェック
+    if (
+      typeof Office !== 'undefined' &&
+      Office.context &&
+      Office.context.roamingSettings
+    ) {
+      Office.context.roamingSettings.set(key, value);
+      return new Promise<void>((resolve, reject) => {
+        Office.context.roamingSettings.saveAsync((result) => {
+          if (result.status === Office.AsyncResultStatus.Succeeded) {
+            resolve();
+          } else {
+            reject(
+              new Error(result.error?.message || 'roamingSettings保存に失敗')
+            );
+          }
+        });
+      });
+    }
+    // フォールバックとしてlocalStorageを使用
+    localStorage.setItem(key, value);
+    return Promise.resolve();
+  } catch (error) {
+    console.warn(
+      'roamingSettings not available, falling back to localStorage:',
+      error
+    );
+    localStorage.setItem(key, value);
+    return Promise.resolve();
+  }
+};
+
 const App: React.FC = () => {
   const [mapping, setMapping] = useState<Mapping[]>([]);
   const [saveName, setSaveName] = useState(''); // 入力欄（新規名用）
@@ -48,11 +105,31 @@ const App: React.FC = () => {
   // file input リセット用
   const [fileInputKey] = useState(0);
 
-  // 初期ロード：localStorage のマッピングを読み込んで表示
+  type StoredMapping = {
+    findText: string | { value: string };
+    replaceText?: string;
+  };
+
+  const reviveMapping = useCallback((raw: StoredMapping[]): Mapping[] => {
+    return (raw ?? []).map(
+      (m) =>
+        new Mapping(
+          new FindText(
+            typeof m.findText === 'string'
+              ? m.findText
+              : m.findText?.value ?? ''
+          ),
+          m.replaceText ?? ''
+        )
+    );
+  }, []);
+
+  // 初期ロード：roamingSettings のマッピングを読み込んで表示
   useEffect(() => {
-    setCurrentRuleName(localStorage.getItem(STORAGE_KEY) || DEFAULT_RULE_NAME);
-    setSaveName(currentRuleName);
-    const saved = localStorage.getItem(currentRuleName);
+    const currentRule = getRoamingSetting(STORAGE_KEY) || DEFAULT_RULE_NAME;
+    setCurrentRuleName(currentRule);
+    setSaveName(currentRule);
+    const saved = getRoamingSetting(currentRule);
     if (saved) {
       try {
         setMapping(JSON.parse(saved));
@@ -74,7 +151,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!currentRuleName) return;
     try {
-      const saved = localStorage.getItem(currentRuleName);
+      const saved = getRoamingSetting(currentRuleName);
       if (saved) {
         try {
           const parsed = JSON.parse(saved) as StoredMapping[];
@@ -83,12 +160,12 @@ const App: React.FC = () => {
           console.error(e);
         }
       }
-      localStorage.setItem(STORAGE_KEY, currentRuleName);
+      setRoamingSetting(STORAGE_KEY, currentRuleName).catch(console.error);
       setSaveName(currentRuleName);
     } catch (e) {
       console.error('load mapping by currentRuleName error:', e);
     }
-  }, [currentRuleName]);
+  }, [currentRuleName, reviveMapping]);
 
   // useEffect(() => {
   //   const timeoutId = setTimeout(() => {
@@ -104,25 +181,6 @@ const App: React.FC = () => {
 
   //   return () => clearTimeout(timeoutId);
   // }, [mapping]);
-
-  type StoredMapping = {
-    findText: string | { value: string };
-    replaceText?: string;
-  };
-
-  const reviveMapping = (raw: StoredMapping[]): Mapping[] => {
-    return (raw ?? []).map(
-      (m) =>
-        new Mapping(
-          new FindText(
-            typeof m.findText === 'string'
-              ? m.findText
-              : m.findText?.value ?? ''
-          ),
-          m.replaceText ?? ''
-        )
-    );
-  };
 
   // 「ルールの追加」ボタン
   const onAddRule = () => {
@@ -157,8 +215,8 @@ const App: React.FC = () => {
     fileRegistry.set(CSV_FILE_STORAGE_ID, file);
     if (!file) return;
     const m = await externalRepository.load(CSV_FILE_STORAGE_ID);
-    localMappingRepository.save(DEFAULT_RULE_NAME, m);
-    localStorage.setItem(STORAGE_KEY, DEFAULT_RULE_NAME);
+    await localMappingRepository.save(DEFAULT_RULE_NAME, m);
+    await setRoamingSetting(STORAGE_KEY, DEFAULT_RULE_NAME);
     setCurrentRuleName(DEFAULT_RULE_NAME);
     setMapping(m);
   };
@@ -168,7 +226,7 @@ const App: React.FC = () => {
     const name = saveName.trim();
     if (!name) return;
     try {
-      localStorage.setItem(STORAGE_KEY, name);
+      await setRoamingSetting(STORAGE_KEY, name);
       await localMappingRepository.save(name, mapping);
       await localListRepository.add(RULE_LIST_NAME, [name]);
       setCurrentRuleName(name);
