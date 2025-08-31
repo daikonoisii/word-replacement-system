@@ -250,6 +250,22 @@ const App: React.FC = () => {
 
       <div className="button-container">
         <button onClick={onAddRule}>項目の追加</button>
+        {/* 置換実行ボタン */}
+        <button
+          onClick={async () => {
+            try {
+              if (!currentRuleName) {
+                throw new Error('currentRuleName is empty');
+              }
+              await useCase.run(mapping);
+            } catch (e) {
+              console.error(e);
+            }
+          }}
+          disabled={mapping.length === 0}
+        >
+          置換実行
+        </button>
         {/* 置換を取り消すボタン */}
         <button
           className="undo-button"
@@ -266,22 +282,6 @@ const App: React.FC = () => {
           }}
         >
           元に戻す
-        </button>
-        {/* 置換実行ボタン */}
-        <button
-          onClick={async () => {
-            try {
-              if (!currentRuleName) {
-                throw new Error('currentRuleName is empty');
-              }
-              await useCase.run(mapping);
-            } catch (e) {
-              console.error(e);
-            }
-          }}
-          disabled={mapping.length === 0}
-        >
-          置換実行
         </button>
         {/* ハイライトの削除ボタン */}
         <button
