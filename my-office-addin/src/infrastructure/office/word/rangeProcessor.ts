@@ -42,9 +42,15 @@ export class ReplaceHighlightProcessor implements IRangeProcessor {
 }
 
 export class HighlightProcessor implements IRangeProcessor {
-  private readonly color: string | null;
-  constructor(color?: string) {
-    this.color = color ?? null;
+  private readonly afterColor: string | null;
+  private readonly beforeColor: string | null | undefined;
+
+  constructor(
+    afterColor: string | null,
+    beforeColor?: string | null | undefined
+  ) {
+    this.afterColor = afterColor;
+    this.beforeColor = beforeColor;
   }
 
   async process(
@@ -53,8 +59,16 @@ export class HighlightProcessor implements IRangeProcessor {
     _context: Word.RequestContext
   ): Promise<void> {
     for (const r of ranges) {
+      // nullはハイライトされていない箇所のみを対象とする
+      // undefinedは全ての色を対象
+      if (
+        r.font.highlightColor != this.beforeColor &&
+        this.beforeColor != undefined
+      ) {
+        continue;
+      }
       // @ts-ignore
-      r.font.highlightColor = this.color;
+      r.font.highlightColor = this.afterColor;
     }
   }
 }

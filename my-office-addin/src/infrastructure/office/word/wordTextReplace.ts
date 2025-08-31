@@ -46,7 +46,7 @@ export class WordTextUndoReplacer implements ITextReplacer {
     // 検索後に置換を実行するプロセッサ群を注入
     const processors: IRangeProcessor[] = [
       new ReplaceHighlightProcessor(HIGHLIGHT_COLOR),
-      new HighlightProcessor(),
+      new HighlightProcessor(null),
     ];
     this.service = new RangeProcessorService(processors);
   }
