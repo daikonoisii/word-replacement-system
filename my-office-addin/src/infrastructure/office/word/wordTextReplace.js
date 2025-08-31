@@ -49,7 +49,7 @@ export class WordTextHighlightColorReplacer {
     service;
     constructor(beforeColor, afterColor) {
         const processors = [
-            new HighlightProcessor(beforeColor, afterColor),
+            new HighlightProcessor(afterColor, beforeColor),
         ];
         this.service = new RangeProcessorService(processors);
     }
