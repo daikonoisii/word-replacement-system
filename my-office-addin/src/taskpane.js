@@ -144,18 +144,7 @@ const App = () => {
     };
     return (_jsxs("div", { className: "container", children: [_jsx("div", { className: "load-csv", children: _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }, fileInputKey) }), _jsxs("div", { className: "form-group", children: [_jsx("span", { className: "form-label", children: "\u9805\u76EE\u3092\u9078\u629E\uFF1A" }), _jsx("label", { children: _jsxs("select", { value: currentRuleName, onChange: (e) => {
                                 setCurrentRuleName(e.target.value);
-                            }, children: [_jsx("option", { value: "", disabled: true, children: "\u9078\u629E\u3057\u3066\u304F\u3060\u3055\u3044" }), ruleNames.map((name) => (_jsx("option", { value: name, children: name }, name)))] }) })] }), _jsx("div", { className: "rules", children: mapping.map((rule, idx) => (_jsxs("div", { className: "rule-row", children: [_jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u524D", value: rule.findText.value, onChange: onChangeRule(idx, 'findText') }), _jsx("span", { className: "arrow", children: "\u2192" }), _jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u5F8C", value: rule.replaceText, onChange: onChangeRule(idx, 'replaceText') }), _jsx("button", { onClick: () => onRemoveRule(idx), children: "\u524A\u9664" })] }, idx))) }), _jsxs("div", { className: "button-container", children: [_jsx("button", { onClick: onAddRule, children: "\u9805\u76EE\u306E\u8FFD\u52A0" }), _jsx("button", { className: "undo-button", onClick: async () => {
-                            try {
-                                if (!currentRuleName) {
-                                    throw new Error('currentRuleName is empty');
-                                }
-                                await undoReplacementsUseCase.run(mapping);
-                            }
-                            catch (e) {
-                                console.error(e);
-                            }
-                            // window.localStorage.removeItem(UNDO_STORAGE_KEY);
-                        }, children: "\u5143\u306B\u623B\u3059" }), _jsx("button", { onClick: async () => {
+                            }, children: [_jsx("option", { value: "", disabled: true, children: "\u9078\u629E\u3057\u3066\u304F\u3060\u3055\u3044" }), ruleNames.map((name) => (_jsx("option", { value: name, children: name }, name)))] }) })] }), _jsx("div", { className: "rules", children: mapping.map((rule, idx) => (_jsxs("div", { className: "rule-row", children: [_jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u524D", value: rule.findText.value, onChange: onChangeRule(idx, 'findText') }), _jsx("span", { className: "arrow", children: "\u2192" }), _jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u5F8C", value: rule.replaceText, onChange: onChangeRule(idx, 'replaceText') }), _jsx("button", { onClick: () => onRemoveRule(idx), children: "\u524A\u9664" })] }, idx))) }), _jsxs("div", { className: "button-container", children: [_jsx("button", { onClick: onAddRule, children: "\u9805\u76EE\u306E\u8FFD\u52A0" }), _jsx("button", { onClick: async () => {
                             try {
                                 if (!currentRuleName) {
                                     throw new Error('currentRuleName is empty');
@@ -166,6 +155,17 @@ const App = () => {
                                 console.error(e);
                             }
                         }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" }), _jsx("button", { className: "undo-button", onClick: async () => {
+                            try {
+                                if (!currentRuleName) {
+                                    throw new Error('currentRuleName is empty');
+                                }
+                                await undoReplacementsUseCase.run(mapping);
+                            }
+                            catch (e) {
+                                console.error(e);
+                            }
+                            // window.localStorage.removeItem(UNDO_STORAGE_KEY);
+                        }, children: "\u5143\u306B\u623B\u3059" }), _jsx("button", { className: "undo-button", onClick: async () => {
                             try {
                                 if (!currentRuleName) {
                                     throw new Error('currentRuleName is empty');
