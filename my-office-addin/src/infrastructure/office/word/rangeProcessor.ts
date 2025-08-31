@@ -56,9 +56,15 @@ export class HighlightProcessor implements IRangeProcessor {
   async process(
     ranges: Word.Range[],
     _mapping: Mapping,
-    _context: Word.RequestContext
+    context: Word.RequestContext
   ): Promise<void> {
     for (const r of ranges) {
+      // 全てのhighlightColorをload
+      for (const r of ranges) {
+        r.font.load('highlightColor');
+      }
+      await context.sync();
+
       // nullはハイライトされていない箇所のみを対象とする
       // undefinedは全ての色を対象
       if (
