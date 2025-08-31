@@ -6,8 +6,26 @@ export class MetadataProcessor {
         await context.sync();
         const ooxmlValues = ooxmlPromises.map((cr) => cr.value);
         // レコードを追記
-        const raw = window.localStorage.getItem(UNDO_STORAGE_KEY);
-        const records = raw ? JSON.parse(raw) : [];
+        let raw = null;
+        let records = [];
+        try {
+            // Office.contextが利用可能かチェック
+            if (typeof Office !== 'undefined' &&
+                Office.context &&
+                Office.context.roamingSettings) {
+                raw = Office.context.roamingSettings.get(UNDO_STORAGE_KEY);
+            }
+            else {
+                // フォールバックとしてlocalStorageを使用
+                raw = localStorage.getItem(UNDO_STORAGE_KEY);
+            }
+            records = raw ? JSON.parse(raw) : [];
+        }
+        catch (error) {
+            console.warn('roamingSettings not available, falling back to localStorage:', error);
+            raw = localStorage.getItem(UNDO_STORAGE_KEY);
+            records = raw ? JSON.parse(raw) : [];
+        }
         for (const ooxmlText of ooxmlValues) {
             records.push({
                 findText: mapping.findText.value,
@@ -15,6 +33,24 @@ export class MetadataProcessor {
                 ooxmlText,
             });
         }
-        window.localStorage.setItem(UNDO_STORAGE_KEY, JSON.stringify(records));
+        try {
+            // Office.contextが利用可能かチェック
+            if (typeof Office !== 'undefined' &&
+                Office.context &&
+                Office.context.roamingSettings) {
+                Office.context.roamingSettings.set(UNDO_STORAGE_KEY, JSON.stringify(records));
+                Office.context.roamingSettings.saveAsync(() => {
+                    // 保存の完了は特に待たない（非同期で実行）
+                });
+            }
+            else {
+                // フォールバックとしてlocalStorageを使用
+                localStorage.setItem(UNDO_STORAGE_KEY, JSON.stringify(records));
+            }
+        }
+        catch (error) {
+            console.warn('roamingSettings not available, falling back to localStorage:', error);
+            localStorage.setItem(UNDO_STORAGE_KEY, JSON.stringify(records));
+        }
     }
 }
