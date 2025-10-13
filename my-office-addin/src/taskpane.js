@@ -3,6 +3,7 @@ import { Mapping } from 'src/domain/mapping';
 import { createRoot } from 'react-dom/client';
 import React, { useState, useEffect, useCallback } from 'react';
 import { STORAGE_KEY, CSV_FILE_STORAGE_ID, HIGHLIGHT_COLOR, DEFAULT_RULE_NAME, RULE_LIST_NAME, } from 'src/constants/storage';
+import loadingGif from 'src/assets/loading.gif';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
 import { ReplaceAndHighlightReplacer, WordTextUndoReplacer, WordTextHighlightColorReplacer, } from 'src/infrastructure/office/word/wordTextReplace';
 import { LocalStorageMappingRepository, LocalStorageListRepository, } from 'src/infrastructure/storage/localStorage';
@@ -71,6 +72,7 @@ const App = () => {
     const [ruleNames, setRuleNames] = useState([]);
     // file input リセット用
     const [fileInputKey] = useState(0);
+    const [isUndoLoading, setIsUndoLoading] = useState(false);
     const reviveMapping = useCallback((raw) => {
         return (raw ?? []).map((m) => new Mapping(new FindText(typeof m.findText === 'string'
             ? m.findText
@@ -214,7 +216,8 @@ const App = () => {
                             catch (e) {
                                 console.error(e);
                             }
-                        }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" }), _jsx("button", { className: "undo-button", onClick: async () => {
+                        }, disabled: mapping.length === 0, children: "\u7F6E\u63DB\u5B9F\u884C" }), _jsx("button", { className: "undo-button", disabled: isUndoLoading, onClick: async () => {
+                            setIsUndoLoading(true);
                             try {
                                 if (!currentRuleName) {
                                     throw new Error('currentRuleName is empty');
@@ -224,8 +227,11 @@ const App = () => {
                             catch (e) {
                                 console.error(e);
                             }
+                            finally {
+                                setIsUndoLoading(false);
+                            }
                             // window.localStorage.removeItem(UNDO_STORAGE_KEY);
-                        }, children: "\u5143\u306B\u623B\u3059" }), _jsx("button", { className: "undo-button", onClick: async () => {
+                        }, children: isUndoLoading ? (_jsx("span", { className: "button-loading", children: _jsx("img", { src: loadingGif, alt: "\u51E6\u7406\u4E2D", className: "button-loading__image" }) })) : ('元に戻す') }), _jsx("button", { className: "undo-button", onClick: async () => {
                             try {
                                 if (!currentRuleName) {
                                     throw new Error('currentRuleName is empty');
