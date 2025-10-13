@@ -99,6 +99,17 @@ button:disabled {
   background-color: #c53030; /* 少し濃い赤に */
 }
 
+.button-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button-loading__image {
+  width: 24px;
+  height: 24px;
+}
+
 .form-group {
   display: flex;
   flex-direction: column; /* 縦並び */
