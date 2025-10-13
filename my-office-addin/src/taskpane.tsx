@@ -9,6 +9,7 @@ import {
   DEFAULT_RULE_NAME,
   RULE_LIST_NAME,
 } from 'src/constants/storage';
+import loadingGif from 'src/assets/loading.gif';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
 import {
   ReplaceAndHighlightReplacer,
@@ -104,6 +105,7 @@ const App: React.FC = () => {
   const [ruleNames, setRuleNames] = useState<string[]>([]);
   // file input リセット用
   const [fileInputKey] = useState(0);
+  const [isUndoLoading, setIsUndoLoading] = useState(false);
 
   type StoredMapping = {
     findText: string | { value: string };
@@ -327,7 +329,9 @@ const App: React.FC = () => {
         {/* 置換を取り消すボタン */}
         <button
           className="undo-button"
+          disabled={isUndoLoading}
           onClick={async () => {
+            setIsUndoLoading(true);
             try {
               if (!currentRuleName) {
                 throw new Error('currentRuleName is empty');
@@ -335,11 +339,23 @@ const App: React.FC = () => {
               await undoReplacementsUseCase.run(mapping);
             } catch (e) {
               console.error(e);
+            } finally {
+              setIsUndoLoading(false);
             }
             // window.localStorage.removeItem(UNDO_STORAGE_KEY);
           }}
         >
-          元に戻す
+          {isUndoLoading ? (
+            <span className="button-loading">
+              <img
+                src={loadingGif}
+                alt="処理中"
+                className="button-loading__image"
+              />
+            </span>
+          ) : (
+            '元に戻す'
+          )}
         </button>
         {/* ハイライトの削除ボタン */}
         <button
