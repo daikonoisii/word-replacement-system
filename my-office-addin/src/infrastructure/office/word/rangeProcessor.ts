@@ -65,11 +65,11 @@ export class ReplaceEnglishProcessor implements IRangeProcessor {
       if (letters.length > 0) {
         const hasLower = /[a-z]/.test(letters);
         if (hasLower) {
-          // 1文字でも小文字が混ざっていれば半角・小文字に揃える
-          replacement = toHalfwidth(original).toLowerCase();
+          // 1文字でも小文字が混ざっていれば半角に統一（大文字小文字は保持）
+          replacement = toHalfwidth(original);
         } else {
-          // 全て大文字なら全角・大文字に揃える
-          replacement = toFullwidth(original).toUpperCase();
+          // 全て大文字なら全角に統一（大文字のまま）
+          replacement = toFullwidth(original);
         }
       }
 
