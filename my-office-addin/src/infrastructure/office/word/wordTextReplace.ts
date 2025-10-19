@@ -82,10 +82,11 @@ export class ReplaceEnglishAndHighlightReplacer implements ITextReplacer {
   private readonly color: string;
   constructor(color: string) {
     this.color = color;
-    // 検索後に「置換→ハイライト」の順で実行するプロセッサ群を注入
+    // 検索後に「ハイライト判定→置換」の順で実行するプロセッサ群を注入
+    // 重要: ハイライト判定を先に行い、元のテキストで条件チェックする
     const processors: IRangeProcessor[] = [
-      new ReplaceEnglishProcessor(),
       new EnglishHighlightProcessor(this.color),
+      new ReplaceEnglishProcessor(),
     ];
     const searcher: IRangeSearcher = new EnglishSearcher();
     this.service = createProcessorService(processors, searcher);
