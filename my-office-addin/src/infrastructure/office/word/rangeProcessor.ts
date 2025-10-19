@@ -16,7 +16,7 @@ export class ReplaceProcessor implements IRangeProcessor {
 export class ReplaceEnglishProcessor implements IRangeProcessor {
   async process(
     ranges: Word.Range[],
-    mapping: Mapping,
+    _mapping: Mapping,
     _context: Word.RequestContext
   ): Promise<void> {
     for (const r of ranges) {
@@ -60,16 +60,16 @@ export class ReplaceEnglishProcessor implements IRangeProcessor {
       const normalized = normalizeFullwidthToAscii(original);
       const letters = (normalized.match(/[A-Za-z]/g) || []).join('');
 
-      let replacement = mapping.replaceText;
+      let replacement = original;
 
       if (letters.length > 0) {
         const hasLower = /[a-z]/.test(letters);
         if (hasLower) {
           // 1文字でも小文字が混ざっていれば半角・小文字に揃える
-          replacement = toHalfwidth(replacement).toLowerCase();
+          replacement = toHalfwidth(original).toLowerCase();
         } else {
           // 全て大文字なら全角・大文字に揃える
-          replacement = toFullwidth(replacement).toUpperCase();
+          replacement = toFullwidth(original).toUpperCase();
         }
       }
 
