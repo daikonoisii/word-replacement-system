@@ -14,9 +14,9 @@ export class EnglishSearcher implements IRangeSearcher {
   run(_mapping: Mapping, body: Word.Body): Word.RangeCollection {
     // 連続したアルファベット(大文字・小文字)のブロックを検索
     // 全角英字（Ａ-Ｚ、ａ-ｚ）も含める
-   return body.search('[A-Za-zＡ-Ｚａ-ｚ]{1,}', {
+    return body.search('<[A-Za-zＡ-Ｚａ-ｚ]{1,}>', {
       matchCase: false,
-      matchWholeWord: true,
+      matchWholeWord: false,
       matchWildcards: true,
     });
   }
