@@ -6,7 +6,7 @@ export class ReplaceProcessor {
     }
 }
 export class ReplaceEnglishProcessor {
-    async process(ranges, mapping, _context) {
+    async process(ranges, _mapping, _context) {
         for (const r of ranges) {
             const original = r.text;
             const normalizeFullwidthToAscii = (s) => s.replace(/[\uFF21-\uFF3A\uFF41-\uFF5A]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
@@ -34,16 +34,16 @@ export class ReplaceEnglishProcessor {
                 .join('');
             const normalized = normalizeFullwidthToAscii(original);
             const letters = (normalized.match(/[A-Za-z]/g) || []).join('');
-            let replacement = mapping.replaceText;
+            let replacement = original;
             if (letters.length > 0) {
                 const hasLower = /[a-z]/.test(letters);
                 if (hasLower) {
                     // 1文字でも小文字が混ざっていれば半角・小文字に揃える
-                    replacement = toHalfwidth(replacement).toLowerCase();
+                    replacement = toHalfwidth(original).toLowerCase();
                 }
                 else {
                     // 全て大文字なら全角・大文字に揃える
-                    replacement = toFullwidth(replacement).toUpperCase();
+                    replacement = toFullwidth(original).toUpperCase();
                 }
             }
             r.insertText(replacement, Word.InsertLocation.replace);
