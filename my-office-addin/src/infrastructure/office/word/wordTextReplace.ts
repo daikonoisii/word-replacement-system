@@ -11,6 +11,35 @@ import { RangeProcessorService } from 'src/infrastructure/office/word/rangeProce
 import { MapSearcher } from 'src/infrastructure/office/word/rangeSearcher';
 import type { IRangeSearcher } from 'src/repositories/rangeSearcherInterface';
 
+function createProcessorService(
+  processors: IRangeProcessor[],
+  searcher: IRangeSearcher
+): RangeProcessorService {
+  try {
+    // Office.contextが利用可能かチェック
+    if (
+      typeof Office !== 'undefined' &&
+      Office.context &&
+      Office.context.roamingSettings
+    ) {
+      Office.context.roamingSettings.remove(UNDO_STORAGE_KEY);
+      Office.context.roamingSettings.saveAsync(() => {
+        // 保存の完了は特に待たない（非同期で実行）
+      });
+    } else {
+      // フォールバックとしてlocalStorageを使用
+      localStorage.removeItem(UNDO_STORAGE_KEY);
+    }
+  } catch (error) {
+    console.warn(
+      'roamingSettings not available, falling back to localStorage:',
+      error
+    );
+    localStorage.removeItem(UNDO_STORAGE_KEY);
+  }
+  return new RangeProcessorService(processors, searcher);
+}
+
 export class WordTextReplacer implements ITextReplacer {
   private readonly service: RangeProcessorService;
   constructor() {
@@ -34,30 +63,8 @@ export class ReplaceAndHighlightReplacer implements ITextReplacer {
       new ReplaceProcessor(),
       new HighlightProcessor(this.color),
     ];
-    try {
-      // Office.contextが利用可能かチェック
-      if (
-        typeof Office !== 'undefined' &&
-        Office.context &&
-        Office.context.roamingSettings
-      ) {
-        Office.context.roamingSettings.remove(UNDO_STORAGE_KEY);
-        Office.context.roamingSettings.saveAsync(() => {
-          // 保存の完了は特に待たない（非同期で実行）
-        });
-      } else {
-        // フォールバックとしてlocalStorageを使用
-        localStorage.removeItem(UNDO_STORAGE_KEY);
-      }
-    } catch (error) {
-      console.warn(
-        'roamingSettings not available, falling back to localStorage:',
-        error
-      );
-      localStorage.removeItem(UNDO_STORAGE_KEY);
-    }
     const searcher: IRangeSearcher = new MapSearcher();
-    this.service = new RangeProcessorService(processors,searcher);
+    this.service = createProcessorService(processors, searcher);
   }
 
   async replace(map: Mapping[]): Promise<void> {
