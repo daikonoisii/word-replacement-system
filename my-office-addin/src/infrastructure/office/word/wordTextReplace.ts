@@ -2,13 +2,17 @@ import type { ITextReplacer } from 'src/repositories/textEditingInterfaces';
 import type { IRangeProcessor } from 'src/repositories/rangeProcessInterface';
 import {
   ReplaceProcessor,
+  ReplaceEnglishProcessor,
   HighlightProcessor,
   ReplaceHighlightProcessor,
 } from 'src/infrastructure/office/word/rangeProcessor';
 import { Mapping, reverseMappings } from 'src/domain/mapping';
 import { UNDO_STORAGE_KEY, HIGHLIGHT_COLOR } from 'src/constants/storage';
 import { RangeProcessorService } from 'src/infrastructure/office/word/rangeProcessorService';
-import { MapSearcher } from 'src/infrastructure/office/word/rangeSearcher';
+import {
+  MapSearcher,
+  EnglishSearcher,
+} from 'src/infrastructure/office/word/rangeSearcher';
 import type { IRangeSearcher } from 'src/repositories/rangeSearcherInterface';
 
 function createProcessorService(
@@ -64,6 +68,25 @@ export class ReplaceAndHighlightReplacer implements ITextReplacer {
       new HighlightProcessor(this.color),
     ];
     const searcher: IRangeSearcher = new MapSearcher();
+    this.service = createProcessorService(processors, searcher);
+  }
+
+  async replace(map: Mapping[]): Promise<void> {
+    await this.service.run(map);
+  }
+}
+
+export class ReplaceEnglishAndHighlightReplacer implements ITextReplacer {
+  private readonly service: RangeProcessorService;
+  private readonly color: string;
+  constructor(color: string) {
+    this.color = color;
+    // 検索後に「置換→ハイライト」の順で実行するプロセッサ群を注入
+    const processors: IRangeProcessor[] = [
+      new ReplaceEnglishProcessor(),
+      new HighlightProcessor(this.color),
+    ];
+    const searcher: IRangeSearcher = new EnglishSearcher();
     this.service = createProcessorService(processors, searcher);
   }
 

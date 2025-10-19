@@ -13,6 +13,71 @@ export class ReplaceProcessor implements IRangeProcessor {
   }
 }
 
+export class ReplaceEnglishProcessor implements IRangeProcessor {
+  async process(
+    ranges: Word.Range[],
+    mapping: Mapping,
+    _context: Word.RequestContext
+  ): Promise<void> {
+    for (const r of ranges) {
+      const original = r.text;
+
+      const normalizeFullwidthToAscii = (s: string) =>
+        s.replace(/[\uFF21-\uFF3A\uFF41-\uFF5A]/g, (c) =>
+          String.fromCharCode(c.charCodeAt(0) - 0xfee0)
+        );
+
+      const toFullwidth = (s: string) =>
+        s
+          .split('')
+          .map((c) => {
+            const code = c.charCodeAt(0);
+            if (
+              (code >= 0x41 && code <= 0x5a) ||
+              (code >= 0x61 && code <= 0x7a)
+            ) {
+              return String.fromCharCode(code + 0xfee0);
+            }
+            return c;
+          })
+          .join('');
+
+      const toHalfwidth = (s: string) =>
+        s
+          .split('')
+          .map((c) => {
+            const code = c.charCodeAt(0);
+            if (
+              (code >= 0xff21 && code <= 0xff3a) ||
+              (code >= 0xff41 && code <= 0xff5a)
+            ) {
+              return String.fromCharCode(code - 0xfee0);
+            }
+            return c;
+          })
+          .join('');
+
+      const normalized = normalizeFullwidthToAscii(original);
+      const letters = (normalized.match(/[A-Za-z]/g) || []).join('');
+
+      let replacement = mapping.replaceText;
+
+      if (letters.length > 0) {
+        const hasLower = /[a-z]/.test(letters);
+        if (hasLower) {
+          // 1文字でも小文字が混ざっていれば半角・小文字に揃える
+          replacement = toHalfwidth(replacement).toLowerCase();
+        } else {
+          // 全て大文字なら全角・大文字に揃える
+          replacement = toFullwidth(replacement).toUpperCase();
+        }
+      }
+
+      r.insertText(replacement, Word.InsertLocation.replace);
+    }
+  }
+}
+
 export class ReplaceHighlightProcessor implements IRangeProcessor {
   private readonly color: string;
   constructor(color?: string) {
