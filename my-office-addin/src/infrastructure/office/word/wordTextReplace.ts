@@ -5,6 +5,7 @@ import {
   ReplaceEnglishProcessor,
   HighlightProcessor,
   ReplaceHighlightProcessor,
+  EnglishHighlightProcessor,
 } from 'src/infrastructure/office/word/rangeProcessor';
 import { Mapping, reverseMappings } from 'src/domain/mapping';
 import { UNDO_STORAGE_KEY, HIGHLIGHT_COLOR } from 'src/constants/storage';
@@ -84,7 +85,7 @@ export class ReplaceEnglishAndHighlightReplacer implements ITextReplacer {
     // 検索後に「置換→ハイライト」の順で実行するプロセッサ群を注入
     const processors: IRangeProcessor[] = [
       new ReplaceEnglishProcessor(),
-      new HighlightProcessor(this.color),
+      new EnglishHighlightProcessor(this.color),
     ];
     const searcher: IRangeSearcher = new EnglishSearcher();
     this.service = createProcessorService(processors, searcher);
