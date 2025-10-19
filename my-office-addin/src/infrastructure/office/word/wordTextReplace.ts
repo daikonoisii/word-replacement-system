@@ -7,14 +7,17 @@ import {
 } from 'src/infrastructure/office/word/rangeProcessor';
 import { Mapping, reverseMappings } from 'src/domain/mapping';
 import { UNDO_STORAGE_KEY, HIGHLIGHT_COLOR } from 'src/constants/storage';
-import { RangeProcessorService } from 'src/infrastructure/office/word/rangeSearch';
+import { RangeProcessorService } from 'src/infrastructure/office/word/rangeProcessorService';
+import { MapSearcher } from 'src/infrastructure/office/word/rangeSearcher';
+import type { IRangeSearcher } from 'src/repositories/rangeSearcherInterface';
 
 export class WordTextReplacer implements ITextReplacer {
   private readonly service: RangeProcessorService;
   constructor() {
     // 検索後に置換を実行するプロセッサ群を注入
     const processors: IRangeProcessor[] = [new ReplaceProcessor()];
-    this.service = new RangeProcessorService(processors);
+    const searcher: IRangeSearcher = new MapSearcher();
+    this.service = new RangeProcessorService(processors, searcher);
   }
   async replace(map: Mapping[]): Promise<void> {
     await this.service.run(map);
@@ -53,7 +56,8 @@ export class ReplaceAndHighlightReplacer implements ITextReplacer {
       );
       localStorage.removeItem(UNDO_STORAGE_KEY);
     }
-    this.service = new RangeProcessorService(processors);
+    const searcher: IRangeSearcher = new MapSearcher();
+    this.service = new RangeProcessorService(processors,searcher);
   }
 
   async replace(map: Mapping[]): Promise<void> {
@@ -69,7 +73,8 @@ export class WordTextUndoReplacer implements ITextReplacer {
       new ReplaceHighlightProcessor(HIGHLIGHT_COLOR),
       new HighlightProcessor(null),
     ];
-    this.service = new RangeProcessorService(processors);
+    const searcher: IRangeSearcher = new MapSearcher();
+    this.service = new RangeProcessorService(processors, searcher);
   }
   async replace(map: Mapping[]): Promise<void> {
     const reversed = reverseMappings(map);
@@ -83,7 +88,8 @@ export class WordTextHighlightColorReplacer implements ITextReplacer {
     const processors: IRangeProcessor[] = [
       new HighlightProcessor(afterColor, beforeColor),
     ];
-    this.service = new RangeProcessorService(processors);
+    const searcher: IRangeSearcher = new MapSearcher();
+    this.service = new RangeProcessorService(processors, searcher);
   }
   async replace(map: Mapping[]): Promise<void> {
     const reversed = reverseMappings(map);

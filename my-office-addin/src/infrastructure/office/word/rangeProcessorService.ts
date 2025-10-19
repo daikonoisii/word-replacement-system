@@ -1,10 +1,16 @@
 import type { Mapping } from 'src/domain/mapping';
 import type { IRangeProcessor } from 'src/repositories/rangeProcessInterface';
+import type { IRangeSearcher } from 'src/repositories/rangeSearcherInterface';
 
 export class RangeProcessorService {
   private readonly processors: IRangeProcessor[];
-  constructor(processors: IRangeProcessor[]) {
+  private readonly searcher: IRangeSearcher;
+  constructor(
+    processors: IRangeProcessor[],
+    searcher: IRangeSearcher,
+  ) {
     this.processors = processors;
+    this.searcher = searcher;
   }
 
   async run(map: Mapping[]): Promise<void> {
@@ -12,10 +18,7 @@ export class RangeProcessorService {
       const body = context.document.body;
 
       for (const mapping of map) {
-        const results = body.search(mapping.findText.toString(), {
-          matchCase: true,
-          matchWholeWord: false,
-        });
+        const results = this.searcher.run(mapping, body);
         results.load('items');
         await context.sync();
 
