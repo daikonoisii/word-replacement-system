@@ -12,7 +12,7 @@ export class EnglishSearcher {
         // 全角英字（Ａ-Ｚ、ａ-ｚ）も含める
         return body.search('[A-Za-zＡ-Ｚａ-ｚ]{1,}', {
             matchCase: false,
-            matchWholeWord: true,
+            matchWholeWord: false,
             matchWildcards: true,
         });
     }
