@@ -143,3 +143,66 @@ export class HighlightProcessor implements IRangeProcessor {
     }
   }
 }
+
+export class EnglishHighlightProcessor implements IRangeProcessor {
+  private readonly color: string | null;
+
+  constructor(color: string | null) {
+    this.color = color;
+  }
+
+  async process(
+    ranges: Word.Range[],
+    _mapping: Mapping,
+    context: Word.RequestContext
+  ): Promise<void> {
+    // テキストを読み込む
+    for (const r of ranges) {
+      r.load('text');
+    }
+    await context.sync();
+
+    for (const r of ranges) {
+      const original = r.text;
+
+      // 半角アルファベットが含まれているか
+      const hasHalfwidth = /[A-Za-z]/.test(original);
+      // 全角アルファベットが含まれているか
+      const hasFullwidth = /[Ａ-Ｚａ-ｚ]/.test(original);
+
+      // ハイライト条件をチェック
+      let shouldHighlight = false;
+
+      if (hasHalfwidth && hasFullwidth) {
+        // 条件1: 半角と全角が混在
+        shouldHighlight = true;
+      } else if (hasFullwidth && !hasHalfwidth) {
+        // 全角のみの場合
+        const hasUppercase = /[Ａ-Ｚ]/.test(original);
+        const hasLowercase = /[ａ-ｚ]/.test(original);
+
+        if (hasUppercase && hasLowercase) {
+          // 条件2: 小文字と大文字が混在していて、全て全角
+          shouldHighlight = true;
+        } else if (hasLowercase && !hasUppercase) {
+          // 条件4: 全て小文字の全角
+          shouldHighlight = true;
+        }
+      } else if (hasHalfwidth && !hasFullwidth) {
+        // 半角のみの場合
+        const hasUppercase = /[A-Z]/.test(original);
+        const hasLowercase = /[a-z]/.test(original);
+
+        if (hasUppercase && !hasLowercase) {
+          // 条件3: 全て大文字の半角
+          shouldHighlight = true;
+        }
+      }
+
+      if (shouldHighlight) {
+        // @ts-expect-error Word API の型定義が不完全なため無視
+        r.font.highlightColor = this.color;
+      }
+    }
+  }
+}
