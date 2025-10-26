@@ -7,8 +7,17 @@ export class ReplaceProcessor {
 }
 export class ReplaceEnglishProcessor {
     async process(ranges, _mapping, _context) {
+        console.log('=== ReplaceEnglishProcessor: 処理開始 ===');
+        console.log('処理対象の範囲数:', ranges.length);
         for (const r of ranges) {
             const original = r.text;
+            // デバッグログ: 範囲のテキスト内容を確認
+            console.log('--- 範囲の処理開始 ---');
+            console.log('Range text (JSON):', JSON.stringify(original));
+            console.log('Range text (length):', original.length);
+            console.log('Range text (char codes):', Array.from(original)
+                .map((c) => `${c}(${c.charCodeAt(0).toString(16)})`)
+                .join(' '));
             const normalizeFullwidthToAscii = (s) => s.replace(/[\uFF21-\uFF3A\uFF41-\uFF5A]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
             const toFullwidth = (s) => s
                 .split('')
@@ -40,14 +49,21 @@ export class ReplaceEnglishProcessor {
                 if (hasLower) {
                     // 1文字でも小文字が混ざっていれば半角に統一（大文字小文字は保持）
                     replacement = toHalfwidth(original);
+                    console.log('判定: 小文字を含む → 半角に統一');
                 }
                 else {
                     // 全て大文字なら全角に統一（大文字のまま）
                     replacement = toFullwidth(original);
+                    console.log('判定: 全て大文字 → 全角に統一');
                 }
             }
+            console.log('Original:', JSON.stringify(original));
+            console.log('Replacement:', JSON.stringify(replacement));
+            console.log('変換前後が同じ?:', original === replacement);
             r.insertText(replacement, Word.InsertLocation.replace);
+            console.log('--- 範囲の処理完了 ---');
         }
+        console.log('=== ReplaceEnglishProcessor: 処理完了 ===');
     }
 }
 export class ReplaceHighlightProcessor {
@@ -90,7 +106,7 @@ export class HighlightProcessor {
                 this.beforeColor != undefined) {
                 continue;
             }
-            // @ts-ignore
+            // @ts-expect-error Word API の型定義が不完全なため無視
             r.font.highlightColor = this.afterColor;
         }
     }
