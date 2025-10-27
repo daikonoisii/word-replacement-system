@@ -1,8 +1,8 @@
-import { ReplaceProcessor, ReplaceEnglishProcessor, HighlightProcessor, ReplaceHighlightProcessor, EnglishHighlightProcessor, } from 'src/infrastructure/office/word/rangeProcessor';
+import { ReplaceProcessor, ReplaceEnglishProcessor, HighlightProcessor, ReplaceHighlightProcessor, EnglishHighlightProcessor, UrlHighlightProcessor, ReplaceUrlProcessor, } from 'src/infrastructure/office/word/rangeProcessor';
 import { Mapping, reverseMappings } from 'src/domain/mapping';
 import { UNDO_STORAGE_KEY, HIGHLIGHT_COLOR } from 'src/constants/storage';
 import { RangeProcessorService } from 'src/infrastructure/office/word/rangeProcessorService';
-import { MapSearcher, EnglishSearcher, } from 'src/infrastructure/office/word/rangeSearcher';
+import { MapSearcher, EnglishSearcher, UrlSearcher, } from 'src/infrastructure/office/word/rangeSearcher';
 function createProcessorService(processors, searcher) {
     try {
         // Office.contextが利用可能かチェック
@@ -66,6 +66,23 @@ export class ReplaceEnglishAndHighlightReplacer {
             new ReplaceEnglishProcessor(),
         ];
         const searcher = new EnglishSearcher();
+        this.service = createProcessorService(processors, searcher);
+    }
+    async replace(map) {
+        await this.service.run(map);
+    }
+}
+export class ReplaceUrlAndHighlightReplacer {
+    service;
+    color;
+    constructor(color) {
+        this.color = color;
+        // 検索後に「ハイライト判定→置換」の順で実行するプロセッサ群を注入
+        const processors = [
+            new UrlHighlightProcessor(this.color),
+            new ReplaceUrlProcessor(),
+        ];
+        const searcher = new UrlSearcher();
         this.service = createProcessorService(processors, searcher);
     }
     async replace(map) {

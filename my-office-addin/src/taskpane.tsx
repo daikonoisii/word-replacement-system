@@ -16,6 +16,7 @@ import {
   WordTextUndoReplacer,
   WordTextHighlightColorReplacer,
   ReplaceEnglishAndHighlightReplacer,
+  ReplaceUrlAndHighlightReplacer,
 } from 'src/infrastructure/office/word/wordTextReplace';
 import {
   LocalStorageMappingRepository,
@@ -43,6 +44,10 @@ const deleteHighlightUseCase = new ReplaceTextUseCase(
 
 const formatAlphabetUseCase = new ReplaceTextUseCase(
   new ReplaceEnglishAndHighlightReplacer(HIGHLIGHT_COLOR)
+);
+
+const formatUrlUseCase = new ReplaceTextUseCase(
+  new ReplaceUrlAndHighlightReplacer(HIGHLIGHT_COLOR)
 );
 
 const localListRepository = new LocalStorageListRepository();
@@ -260,9 +265,10 @@ const App: React.FC = () => {
     }
   };
 
-  // アルファベット文字列をフォーマット
+  // フォーマット
   const onFormatatAlphabet = () => {
     formatAlphabetUseCase.run([new Mapping(new FindText(''), '')]);
+    formatUrlUseCase.run([new Mapping(new FindText(''), '')]);
   };
 
   return (
@@ -414,9 +420,7 @@ const App: React.FC = () => {
           />
         </div>
         {/* アルファベット文字列をフォーマット */}
-        <button onClick={onFormatatAlphabet}>
-          アルファベットをフォーマット
-        </button>
+        <button onClick={onFormatatAlphabet}>フォーマット</button>
       </div>
     </div>
   );

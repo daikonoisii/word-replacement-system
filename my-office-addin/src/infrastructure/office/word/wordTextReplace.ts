@@ -6,6 +6,8 @@ import {
   HighlightProcessor,
   ReplaceHighlightProcessor,
   EnglishHighlightProcessor,
+  UrlHighlightProcessor,
+  ReplaceUrlProcessor,
 } from 'src/infrastructure/office/word/rangeProcessor';
 import { Mapping, reverseMappings } from 'src/domain/mapping';
 import { UNDO_STORAGE_KEY, HIGHLIGHT_COLOR } from 'src/constants/storage';
@@ -13,6 +15,7 @@ import { RangeProcessorService } from 'src/infrastructure/office/word/rangeProce
 import {
   MapSearcher,
   EnglishSearcher,
+  UrlSearcher,
 } from 'src/infrastructure/office/word/rangeSearcher';
 import type { IRangeSearcher } from 'src/repositories/rangeSearcherInterface';
 
@@ -89,6 +92,25 @@ export class ReplaceEnglishAndHighlightReplacer implements ITextReplacer {
       new ReplaceEnglishProcessor(),
     ];
     const searcher: IRangeSearcher = new EnglishSearcher();
+    this.service = createProcessorService(processors, searcher);
+  }
+
+  async replace(map: Mapping[]): Promise<void> {
+    await this.service.run(map);
+  }
+}
+
+export class ReplaceUrlAndHighlightReplacer implements ITextReplacer {
+  private readonly service: RangeProcessorService;
+  private readonly color: string;
+  constructor(color: string) {
+    this.color = color;
+    // 検索後に「ハイライト判定→置換」の順で実行するプロセッサ群を注入
+    const processors: IRangeProcessor[] = [
+      new UrlHighlightProcessor(this.color),
+      new ReplaceUrlProcessor(),
+    ];
+    const searcher: IRangeSearcher = new UrlSearcher();
     this.service = createProcessorService(processors, searcher);
   }
 

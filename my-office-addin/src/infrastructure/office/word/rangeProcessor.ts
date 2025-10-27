@@ -206,3 +206,62 @@ export class EnglishHighlightProcessor implements IRangeProcessor {
     }
   }
 }
+
+export class UrlHighlightProcessor implements IRangeProcessor {
+  private readonly color: string | null;
+
+  constructor(color: string | null) {
+    this.color = color;
+  }
+
+  async process(
+    ranges: Word.Range[],
+    _mapping: Mapping,
+    context: Word.RequestContext
+  ): Promise<void> {
+    // テキストを読み込む
+    for (const r of ranges) {
+      r.load('text');
+    }
+    await context.sync();
+
+    for (const r of ranges) {
+      const original = r.text;
+
+      // 全角文字が含まれているかチェック
+      const hasFullwidth = /[\uff01-\uff5e]/.test(original);
+
+      if (hasFullwidth) {
+        // 全角文字が含まれている場合はハイライト
+        // @ts-expect-error Word API の型定義が不完全なため無視
+        r.font.highlightColor = this.color;
+      }
+    }
+  }
+}
+
+export class ReplaceUrlProcessor implements IRangeProcessor {
+  async process(
+    ranges: Word.Range[],
+    _mapping: Mapping,
+    _context: Word.RequestContext
+  ): Promise<void> {
+    for (const r of ranges) {
+      const original = r.text;
+
+      // 全角文字を半角に変換
+      const toHalfwidth = (s: string): string => {
+        return s.replace(/[\uff01-\uff5e]/g, (c) => {
+          return String.fromCharCode(c.charCodeAt(0) - 0xfee0);
+        });
+      };
+
+      const replacement = toHalfwidth(original);
+
+      // 変更があった場合のみ置換
+      if (replacement !== original) {
+        r.insertText(replacement, Word.InsertLocation.replace);
+      }
+    }
+  }
+}

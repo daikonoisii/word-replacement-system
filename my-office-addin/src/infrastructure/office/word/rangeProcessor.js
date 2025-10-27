@@ -147,3 +147,44 @@ export class EnglishHighlightProcessor {
         }
     }
 }
+export class UrlHighlightProcessor {
+    color;
+    constructor(color) {
+        this.color = color;
+    }
+    async process(ranges, _mapping, context) {
+        // テキストを読み込む
+        for (const r of ranges) {
+            r.load('text');
+        }
+        await context.sync();
+        for (const r of ranges) {
+            const original = r.text;
+            // 全角文字が含まれているかチェック
+            const hasFullwidth = /[\uff01-\uff5e]/.test(original);
+            if (hasFullwidth) {
+                // 全角文字が含まれている場合はハイライト
+                // @ts-expect-error Word API の型定義が不完全なため無視
+                r.font.highlightColor = this.color;
+            }
+        }
+    }
+}
+export class ReplaceUrlProcessor {
+    async process(ranges, _mapping, _context) {
+        for (const r of ranges) {
+            const original = r.text;
+            // 全角文字を半角に変換
+            const toHalfwidth = (s) => {
+                return s.replace(/[\uff01-\uff5e]/g, (c) => {
+                    return String.fromCharCode(c.charCodeAt(0) - 0xfee0);
+                });
+            };
+            const replacement = toHalfwidth(original);
+            // 変更があった場合のみ置換
+            if (replacement !== original) {
+                r.insertText(replacement, Word.InsertLocation.replace);
+            }
+        }
+    }
+}
