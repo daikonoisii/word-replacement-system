@@ -25,9 +25,9 @@ export class EnglishSearcher implements IRangeSearcher {
 
 export class UrlSearcher implements IRangeSearcher {
   run(_mapping: Mapping, body: Word.Body): Word.RangeCollection {
-    // http:// または https:// で始まるURLを検索
+    // http:// または https:// で始まるURL全体を検索（全角・半角両対応）
     return body.search(
-      '[hｈ][tｔ][tｔ][pｐ][sｓ]?[:：][/／][/／][!-~！-～]{1,}',
+      '[hｈ][tｔ][tｔ][pｐ]*[ ^13,.:;!?)、。：；！？）]{0,1}',
       {
         matchCase: false,
         matchWholeWord: false,
