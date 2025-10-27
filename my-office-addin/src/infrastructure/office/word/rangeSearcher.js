@@ -21,7 +21,7 @@ export class EnglishSearcher {
 export class UrlSearcher {
     run(_mapping, body) {
         // http:// または https:// で始まるURLを検索
-        return body.search('[hｈ][tｔ][tｔ][pｐ][sｓ]?[:\uff1a][/／][/／][!-~\uff01-\uff5e]{1,}', {
+        return body.search('[hｈ][tｔ][tｔ][pｐ][sｓ]?[:：][/／][/／][!-~！-～]{1,}', {
             matchCase: false,
             matchWholeWord: false,
             matchWildcards: true,
