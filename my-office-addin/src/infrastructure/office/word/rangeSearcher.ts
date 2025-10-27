@@ -26,13 +26,10 @@ export class EnglishSearcher implements IRangeSearcher {
 export class UrlSearcher implements IRangeSearcher {
   run(_mapping: Mapping, body: Word.Body): Word.RangeCollection {
     // http:// または https:// で始まるURLを検索
-    return body.search(
-      '[hｈ][tｔ][tｔ][pｐ][sｓ]?[:：][/／][/／][!-~！-～]{1,}',
-      {
-        matchCase: false,
-        matchWholeWord: false,
-        matchWildcards: true,
-      }
-    );
+    return body.search('http*[ ^13]', {
+      matchCase: false,
+      matchWholeWord: false,
+      matchWildcards: true,
+    });
   }
 }
