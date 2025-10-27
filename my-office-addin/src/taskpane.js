@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { STORAGE_KEY, CSV_FILE_STORAGE_ID, HIGHLIGHT_COLOR, DEFAULT_RULE_NAME, RULE_LIST_NAME, } from 'src/constants/storage';
 import loadingGif from 'src/assets/loading.gif';
 import { ReplaceTextUseCase } from 'src/usecases/replaceTextUseCase';
-import { ReplaceAndHighlightReplacer, WordTextUndoReplacer, WordTextHighlightColorReplacer, ReplaceEnglishAndHighlightReplacer, } from 'src/infrastructure/office/word/wordTextReplace';
+import { ReplaceAndHighlightReplacer, WordTextUndoReplacer, WordTextHighlightColorReplacer, ReplaceEnglishAndHighlightReplacer, ReplaceUrlAndHighlightReplacer, } from 'src/infrastructure/office/word/wordTextReplace';
 import { LocalStorageMappingRepository, LocalStorageListRepository, } from 'src/infrastructure/storage/localStorage';
 import { CsvMappingRepository } from 'src/infrastructure/storage/csv';
 import { CsvTextDecoderService } from 'src/infrastructure/decoder/textDecoder';
@@ -19,6 +19,7 @@ const useCase = new ReplaceTextUseCase(replacer);
 const undoReplacementsUseCase = new ReplaceTextUseCase(new WordTextUndoReplacer());
 const deleteHighlightUseCase = new ReplaceTextUseCase(new WordTextHighlightColorReplacer(HIGHLIGHT_COLOR, null));
 const formatAlphabetUseCase = new ReplaceTextUseCase(new ReplaceEnglishAndHighlightReplacer(HIGHLIGHT_COLOR));
+const formatUrlUseCase = new ReplaceTextUseCase(new ReplaceUrlAndHighlightReplacer(HIGHLIGHT_COLOR));
 const localListRepository = new LocalStorageListRepository();
 // roamingSettings用のヘルパー関数（Office.jsの初期化チェック付き）
 const getRoamingSetting = (key) => {
@@ -206,9 +207,10 @@ const App = () => {
             console.error('上書き保存 失敗:', e);
         }
     };
-    // アルファベット文字列をフォーマット
+    // フォーマット
     const onFormatatAlphabet = () => {
         formatAlphabetUseCase.run([new Mapping(new FindText(''), '')]);
+        formatUrlUseCase.run([new Mapping(new FindText(''), '')]);
     };
     return (_jsxs("div", { className: "container", children: [_jsx("div", { className: "load-csv", children: _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }, fileInputKey) }), _jsxs("div", { className: "form-group", children: [_jsx("span", { className: "form-label", children: "\u9805\u76EE\u3092\u9078\u629E\uFF1A" }), _jsx("label", { children: _jsxs("select", { value: currentRuleName, onChange: (e) => {
                                 setCurrentRuleName(e.target.value);
@@ -251,7 +253,7 @@ const App = () => {
                             catch (e) {
                                 console.error(e);
                             }
-                        }, disabled: mapping.length === 0, children: "\u86CD\u5149\u30DA\u30F3\u306E\u524A\u9664" }), currentRuleName !== DEFAULT_RULE_NAME && (_jsx("button", { onClick: onOverwrite, disabled: mapping.length === 0, children: "\u4E0A\u66F8\u304D\u4FDD\u5B58" })), _jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSaveAs, children: "\u540D\u524D\u3092\u4ED8\u3051\u3066\u4FDD\u5B58" }), _jsx("input", { type: "text", placeholder: "\u4FDD\u5B58\u540D\u3092\u5165\u529B", onChange: (e) => setSaveName(e.target.value) })] }), _jsx("button", { onClick: onFormatatAlphabet, children: "\u30A2\u30EB\u30D5\u30A1\u30D9\u30C3\u30C8\u3092\u30D5\u30A9\u30FC\u30DE\u30C3\u30C8" })] })] }));
+                        }, disabled: mapping.length === 0, children: "\u86CD\u5149\u30DA\u30F3\u306E\u524A\u9664" }), currentRuleName !== DEFAULT_RULE_NAME && (_jsx("button", { onClick: onOverwrite, disabled: mapping.length === 0, children: "\u4E0A\u66F8\u304D\u4FDD\u5B58" })), _jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSaveAs, children: "\u540D\u524D\u3092\u4ED8\u3051\u3066\u4FDD\u5B58" }), _jsx("input", { type: "text", placeholder: "\u4FDD\u5B58\u540D\u3092\u5165\u529B", onChange: (e) => setSaveName(e.target.value) })] }), _jsx("button", { onClick: onFormatatAlphabet, children: "\u30D5\u30A9\u30FC\u30DE\u30C3\u30C8" })] })] }));
 };
 // Fast Refresh を有効にするために App をエクスポート
 export default App;
