@@ -20,8 +20,8 @@ export class EnglishSearcher {
 }
 export class UrlSearcher {
     run(_mapping, body) {
-        // http:// または https:// で始まるURLを検索
-        return body.search('[hｈ][tｔ][tｔ][pｐ][sｓ]?[:：][/／][/／][!-~！-～]{1,}', {
+        // http:// または https:// で始まるURL全体を検索（全角・半角両対応）
+        return body.search('[hｈ][tｔ][tｔ][pｐ][sｓ]{0,1}[:：][/／]{2}[! 　<>").,;:!?、。，．：；！？」】』〉》】）］」’”」「『“”]@', {
             matchCase: false,
             matchWholeWord: false,
             matchWildcards: true,
