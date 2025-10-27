@@ -21,7 +21,9 @@ export class EnglishSearcher {
 export class UrlSearcher {
     run(_mapping, body) {
         // http:// または https:// で始まるURL全体を検索（全角・半角両対応）
-        return body.search('[hｈ][tｔ][tｔ][pｐ][sｓ]{0,1}[:：][/／]{2}[! 　<>").,;:!?、。，．：；！？」】』〉》】）］」’”」「『“”]@', {
+        return body.search(
+        // ASCII + 全角（コロン・スラッシュ・ドット等の全角も許容）
+        '[hｈ][tｔ][tｔ][pｐ][sｓ]{0,1}[:：][/／]{2}[A-Za-zＡ-Ｚａ-ｚ0-9０-９._．＿~～/:：/／?#？＃@＠%％&＆=＝+＋\\-]{1,}', {
             matchCase: false,
             matchWholeWord: false,
             matchWildcards: true,
