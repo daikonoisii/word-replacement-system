@@ -118,6 +118,8 @@ const App: React.FC = () => {
   const [fileInputKey] = useState(0);
   const [isUndoLoading, setIsUndoLoading] = useState(false);
   const [isReplaceLoading, setIsReplaceLoading] = useState(false);
+  const [isDeleteHighlightLoading, setIsDeleteHighlightLoading] =
+    useState(false);
 
   type StoredMapping = {
     findText: string | { value: string };
@@ -274,7 +276,7 @@ const App: React.FC = () => {
   return (
     <div className="container">
       {/* ローディングオーバーレイ */}
-      {(isReplaceLoading || isUndoLoading) && (
+      {(isReplaceLoading || isUndoLoading || isDeleteHighlightLoading) && (
         <div className="loading-overlay">
           <img
             src={loadingGif}
@@ -382,6 +384,7 @@ const App: React.FC = () => {
         <button
           className="undo-button"
           onClick={async () => {
+            setIsDeleteHighlightLoading(true);
             try {
               if (!currentRuleName) {
                 throw new Error('currentRuleName is empty');
@@ -389,9 +392,11 @@ const App: React.FC = () => {
               await deleteHighlightUseCase.run(mapping);
             } catch (e) {
               console.error(e);
+            } finally {
+              setIsDeleteHighlightLoading(false);
             }
           }}
-          disabled={mapping.length === 0}
+          disabled={mapping.length === 0 || isDeleteHighlightLoading}
         >
           蛍光ペンの削除
         </button>
