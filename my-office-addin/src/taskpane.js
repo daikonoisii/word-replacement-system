@@ -76,6 +76,7 @@ const App = () => {
     const [fileInputKey] = useState(0);
     const [isUndoLoading, setIsUndoLoading] = useState(false);
     const [isReplaceLoading, setIsReplaceLoading] = useState(false);
+    const [isDeleteHighlightLoading, setIsDeleteHighlightLoading] = useState(false);
     const reviveMapping = useCallback((raw) => {
         return (raw ?? []).map((m) => new Mapping(new FindText(typeof m.findText === 'string'
             ? m.findText
@@ -212,7 +213,7 @@ const App = () => {
         formatAlphabetUseCase.run([new Mapping(new FindText(''), '')]);
         formatUrlUseCase.run([new Mapping(new FindText(''), '')]);
     };
-    return (_jsxs("div", { className: "container", children: [_jsx("div", { className: "load-csv", children: _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }, fileInputKey) }), _jsxs("div", { className: "form-group", children: [_jsx("span", { className: "form-label", children: "\u9805\u76EE\u3092\u9078\u629E\uFF1A" }), _jsx("label", { children: _jsxs("select", { value: currentRuleName, onChange: (e) => {
+    return (_jsxs("div", { className: "container", children: [(isReplaceLoading || isUndoLoading || isDeleteHighlightLoading) && (_jsx("div", { className: "loading-overlay", children: _jsx("img", { src: loadingGif, alt: "\u51E6\u7406\u4E2D", className: "loading-overlay__image" }) })), _jsx("div", { className: "load-csv", children: _jsx("input", { type: "file", accept: ".csv", onChange: onFileChange }, fileInputKey) }), _jsxs("div", { className: "form-group", children: [_jsx("span", { className: "form-label", children: "\u9805\u76EE\u3092\u9078\u629E\uFF1A" }), _jsx("label", { children: _jsxs("select", { value: currentRuleName, onChange: (e) => {
                                 setCurrentRuleName(e.target.value);
                             }, children: [_jsx("option", { value: "", disabled: true, children: "\u9078\u629E\u3057\u3066\u304F\u3060\u3055\u3044" }), ruleNames.map((name) => (_jsx("option", { value: name, children: name }, name)))] }) })] }), _jsx("div", { className: "rules", children: mapping.map((rule, idx) => (_jsxs("div", { className: "rule-row", children: [_jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u524D", value: rule.findText.value, onChange: onChangeRule(idx, 'findText') }), _jsx("span", { className: "arrow", children: "\u2192" }), _jsx("input", { type: "text", placeholder: "\u7F6E\u63DB\u5F8C", value: rule.replaceText, onChange: onChangeRule(idx, 'replaceText') }), _jsx("button", { onClick: () => onRemoveRule(idx), children: "\u524A\u9664" })] }, idx))) }), _jsxs("div", { className: "button-container", children: [_jsx("button", { onClick: onAddRule, children: "\u9805\u76EE\u306E\u8FFD\u52A0" }), _jsx("button", { onClick: async () => {
                             setIsReplaceLoading(true);
@@ -228,7 +229,7 @@ const App = () => {
                             finally {
                                 setIsReplaceLoading(false);
                             }
-                        }, disabled: mapping.length === 0 || isReplaceLoading, children: isReplaceLoading ? (_jsx("span", { className: "button-loading", children: _jsx("img", { src: loadingGif, alt: "\u51E6\u7406\u4E2D", className: "button-loading__image" }) })) : ('置換実行') }), _jsx("button", { className: "undo-button", disabled: isUndoLoading, onClick: async () => {
+                        }, disabled: mapping.length === 0 || isReplaceLoading, children: "\u7F6E\u63DB\u5B9F\u884C" }), _jsx("button", { className: "undo-button", disabled: isUndoLoading, onClick: async () => {
                             setIsUndoLoading(true);
                             try {
                                 if (!currentRuleName) {
@@ -243,7 +244,8 @@ const App = () => {
                                 setIsUndoLoading(false);
                             }
                             // window.localStorage.removeItem(UNDO_STORAGE_KEY);
-                        }, children: isUndoLoading ? (_jsx("span", { className: "button-loading", children: _jsx("img", { src: loadingGif, alt: "\u51E6\u7406\u4E2D", className: "button-loading__image" }) })) : ('元に戻す') }), _jsx("button", { className: "undo-button", onClick: async () => {
+                        }, children: "\u5143\u306B\u623B\u3059" }), _jsx("button", { className: "undo-button", onClick: async () => {
+                            setIsDeleteHighlightLoading(true);
                             try {
                                 if (!currentRuleName) {
                                     throw new Error('currentRuleName is empty');
@@ -253,7 +255,10 @@ const App = () => {
                             catch (e) {
                                 console.error(e);
                             }
-                        }, disabled: mapping.length === 0, children: "\u86CD\u5149\u30DA\u30F3\u306E\u524A\u9664" }), currentRuleName !== DEFAULT_RULE_NAME && (_jsx("button", { onClick: onOverwrite, disabled: mapping.length === 0, children: "\u4E0A\u66F8\u304D\u4FDD\u5B58" })), _jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSaveAs, children: "\u540D\u524D\u3092\u4ED8\u3051\u3066\u4FDD\u5B58" }), _jsx("input", { type: "text", placeholder: "\u4FDD\u5B58\u540D\u3092\u5165\u529B", onChange: (e) => setSaveName(e.target.value) })] }), _jsx("button", { onClick: onFormatatAlphabet, children: "\u30D5\u30A9\u30FC\u30DE\u30C3\u30C8" })] })] }));
+                            finally {
+                                setIsDeleteHighlightLoading(false);
+                            }
+                        }, disabled: mapping.length === 0 || isDeleteHighlightLoading, children: "\u86CD\u5149\u30DA\u30F3\u306E\u524A\u9664" }), currentRuleName !== DEFAULT_RULE_NAME && (_jsx("button", { onClick: onOverwrite, disabled: mapping.length === 0, children: "\u4E0A\u66F8\u304D\u4FDD\u5B58" })), _jsxs("div", { className: "controls", children: [_jsx("button", { onClick: onSaveAs, children: "\u540D\u524D\u3092\u4ED8\u3051\u3066\u4FDD\u5B58" }), _jsx("input", { type: "text", placeholder: "\u4FDD\u5B58\u540D\u3092\u5165\u529B", onChange: (e) => setSaveName(e.target.value) })] }), _jsx("button", { onClick: onFormatatAlphabet, children: "\u30D5\u30A9\u30FC\u30DE\u30C3\u30C8" })] })] }));
 };
 // Fast Refresh を有効にするために App をエクスポート
 export default App;
