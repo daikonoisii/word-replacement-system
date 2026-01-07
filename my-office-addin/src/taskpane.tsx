@@ -273,6 +273,16 @@ const App: React.FC = () => {
 
   return (
     <div className="container">
+      {/* ローディングオーバーレイ */}
+      {(isReplaceLoading || isUndoLoading) && (
+        <div className="loading-overlay">
+          <img
+            src={loadingGif}
+            alt="処理中"
+            className="loading-overlay__image"
+          />
+        </div>
+      )}
       {/* 上部コントロール */}
       {/* CSV 読み込み用 */}
       <div className="load-csv">
@@ -345,17 +355,7 @@ const App: React.FC = () => {
           }}
           disabled={mapping.length === 0 || isReplaceLoading}
         >
-          {isReplaceLoading ? (
-            <span className="button-loading">
-              <img
-                src={loadingGif}
-                alt="処理中"
-                className="button-loading__image"
-              />
-            </span>
-          ) : (
-            '置換実行'
-          )}
+          置換実行
         </button>
         {/* 置換を取り消すボタン */}
         <button
@@ -376,17 +376,7 @@ const App: React.FC = () => {
             // window.localStorage.removeItem(UNDO_STORAGE_KEY);
           }}
         >
-          {isUndoLoading ? (
-            <span className="button-loading">
-              <img
-                src={loadingGif}
-                alt="処理中"
-                className="button-loading__image"
-              />
-            </span>
-          ) : (
-            '元に戻す'
-          )}
+          元に戻す
         </button>
         {/* ハイライトの削除ボタン */}
         <button
